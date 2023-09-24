@@ -21,8 +21,8 @@
             let isHost = false;
 
             //Connection
-            //const ip = "216.249.148.174";
-            let ip = "10.200.45.49";
+            const ip = "216.249.148.174";
+            //let ip = "10.200.45.49";
             const PORT = 8080; 
 
             document.addEventListener("DOMContentLoaded", function () {
@@ -48,13 +48,28 @@
                         console.log("is host");
                         console.log(input.value);
                         
-                        fetch('http://' + ip + ':' + PORT + '/send/' + input.value).then(response => response.json()).then(data => {
-                            //nothing goes here for now.
+                        const newText = input.value; // Replace with your new text
+        
+                        // Send a POST request to the server to update currentText
+                        fetch('http://' + ip + ':' + PORT + '/update', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ text: newText }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Updated currentText:', data);
+                        })
+                        .catch(error => {
+                            console.error('Error updating currentText:', error);
                         });
+
                     }
                     console.log("1 second passed");
 
-                }, 1000);
+                }, 2000);
 
 
             });

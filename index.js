@@ -2,8 +2,8 @@
 const express = require('express');
 const fs = require('fs');
 const app = express(); 
-//let ip = "216.249.148.174";
-let ip = "10.200.45.49";
+let ip = "216.249.148.174";
+//let ip = "10.200.45.49";
 let PORT = 8080; 
 const path = require("path");
 const bp = require("body-parser");
@@ -43,12 +43,15 @@ app.get("/retrieve", function(req, res){
     getData();
 });
 
-app.get("/send/:newText", function(req, res){
-    const updateText = async () => {
-        console.log(req.params.newText);
-        currentText.text = req.params.newText;
-    }
-    updateText();
+// POST handler to update currentText
+app.post("/update", function(req, res){
+    const { text } = req.body;
+    
+    // Update the currentText variable
+    currentText.text = text;
+    
+    // Send a response with the updated currentText
+    res.json(currentText);
 });
 
 
