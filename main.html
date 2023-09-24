@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <script src="inputChange.js"></script>
+    </head>
+    <body>
+        <div id="main">
+
+        <div id="testdiv">blank</div>
+
+        <input type="text" placeholder="Enter text here" id="data" name="data">
+
+        </div>
+
+
+
+        <script>
+            //Global variables
+            let currentText;
+            let isHost = false;
+
+            //Connection
+            const ip = "216.249.148.174";
+            const PORT = 8080; 
+
+            document.addEventListener("DOMContentLoaded", function () {
+
+                //Creating the host button
+                let mainDiv = document.getElementById("main");
+                mainDiv.innerHTML += "<button onclick='setHost()'>Host</button>";
+
+                let testdiv = document.getElementById("testdiv");
+                let input = document.getElementById("data");
+
+                
+                const textUpdateInterval = setInterval(() => {
+
+                    if(!isHost) {
+                        console.log("is not host");
+
+                        fetch('http://' + ip + ':' + PORT + '/retrieve').then(response => response.json()).then(data => {
+                            testdiv.innerHTML = data.text;
+                        });
+                    }
+                    else {
+                        console.log("is host");
+                        console.log(input.value);
+                        
+                        fetch('http://' + ip + ':' + PORT + '/send/' + input.value).then(response => response.json()).then(data => {
+                            //nothing goes here for now.
+                        });
+                    }
+                    console.log("1 second passed");
+
+                }, 1000);
+
+
+            });
+
+            function setHost() {
+                if(!isHost) {
+                    isHost = true;
+                    console.log("you are now host.");
+                    console.log(isHost);
+                }
+                else {
+                    isHost = false;
+                    console.log("you are no longer host.");
+                    console.log(isHost);
+                }
+            }
+
+        </script>
+    </body>
+</html>
