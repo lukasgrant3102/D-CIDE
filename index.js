@@ -2,7 +2,7 @@
 const express = require('express');
 const fs = require('fs');
 const app = express(); 
-let ip = "216.249.148.174";
+//let ip = "216.249.148.174";
 //let ip = "10.200.45.49";
 let PORT = 8080; 
 const path = require("path");
@@ -54,8 +54,17 @@ app.post("/update", function(req, res){
     res.json(currentText);
 });
 
+//Must have the user ip to run the program.
+fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
 
-//Listen for requests at the specified port
-http.listen(PORT, ip, function () {
-    console.log('Running at ' + ip + ":" + PORT); 
-}); 
+        //Start main app here.
+        ip = data.ip;
+        console.log(ip);
+
+        //Listen for requests at the specified port
+        http.listen(PORT, ip, function () {
+            console.log('Running at ' + ip + ":" + PORT); 
+        }); 
+    });
