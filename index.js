@@ -30,7 +30,6 @@ fetch('https://api.ipify.org?format=json')
     //Start main app here.
     user_ip = data.ip;
     console.log(user_ip);
-    let deviceID = "not set";
 
     //Set up express and its middleware
     app.use(cors());
@@ -54,12 +53,25 @@ fetch('https://api.ipify.org?format=json')
     });
 
     //Initial setup
-    app.get("/setup", function(req, res){
+    app.post("/setUsername", function(req, res){
+        console.log("The set username request works");
+
+        const { username } = req.body;
+        console.log(username);
+        
+
         // Get the deviceID from the cookie or generate a new one
-        deviceID = req.cookies.deviceID || generateUniqueID();
+        let deviceID = req.cookies.deviceID || generateUniqueID();
+        console.log(deviceID);
 
         // Set the deviceID as a cookie to remember it for future requests
         res.cookie("deviceID", deviceID);
+
+        name_id_pairs[deviceID] = username;
+        console.log("new username set");
+        console.log(name_id_pairs);
+
+        res.send("Username set!");
     });
 
     //GET handler test
@@ -84,8 +96,8 @@ fetch('https://api.ipify.org?format=json')
 
     // POST handler to update the user_texts variable for each users ip
     app.post("/userUpdate", function(req, res){
+
         const id_text_pair = req.body;
-        console.log(id_text_pair);
 
         // Get the deviceID from the cookie or generate a new one
         deviceID = req.cookies.deviceID
@@ -96,7 +108,12 @@ fetch('https://api.ipify.org?format=json')
         // Update the user_texts variable with the deviceID as the key
         user_texts[deviceID] = id_text_pair.text;
 
+        console.log("\nuser_texts: ");
         console.log(user_texts);
+
+        //Shows the current name id pairs on loop
+        console.log("\nname_id_pairs: ");
+        console.log(name_id_pairs);
 
         // Send a response with the updated user_texts
         res.json(user_texts[deviceID]);
@@ -112,7 +129,7 @@ fetch('https://api.ipify.org?format=json')
         getData();
     });
 
-    let ip = "10.200.44.230"
+    let ip = "216.249.148.174";
     //Listen for requests at the specified port
     http.listen(PORT, ip, function () {
         console.log('Running at ' + ip + ":" + PORT); 
@@ -127,5 +144,6 @@ function generateUniqueID() {
     // You can use any method to generate a unique ID here.
     // For simplicity, you can use a random string or a timestamp-based ID.
     const uniqueID = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    console.log("This id was just generated:" + uniqueID);
     return uniqueID;
 }
