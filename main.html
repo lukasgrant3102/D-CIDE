@@ -10,6 +10,7 @@
         <div id="testdiv">blank</div>
 
         <input type="text" placeholder="Enter text here" id="data" name="data">
+        <input type="text" placeholder="Enter username here" id="username" name="username">
 
         </div>
 
@@ -59,6 +60,7 @@
                     //Creating the host button
                     let mainDiv = document.getElementById("main");
                     mainDiv.innerHTML += "<button onclick='setHost()'>Host</button>";
+                    mainDiv.innerHTML += "<button onclick='setUsername()'>Set username</button>";
 
                     let testdiv = document.getElementById("testdiv");
                     let input = document.getElementById("data");
@@ -150,6 +152,26 @@
                 console.log("you are no longer host.");
                 console.log(isHost);
             }
+        }
+
+        function setUsername() {
+            let usernameInput = document.getElementById("username").value;
+            console.log("this is the username: " + usernameInput);
+
+            fetch('http://' + site_ip + ':' + port + '/setUsername', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ "username": usernameInput }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Updated user:', data);
+            })
+            .catch(error => {
+                console.error('Error updating currentText:', error);
+            });
         }
 
         </script>

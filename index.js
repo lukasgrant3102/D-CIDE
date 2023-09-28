@@ -20,6 +20,7 @@ let currentText = {
 //This is the variable that controls all user text.
 
 let user_texts = {};
+let name_id_pairs = {};
 
 //Must have the user ip to run the program.
 fetch('https://api.ipify.org?format=json')
@@ -74,7 +75,7 @@ fetch('https://api.ipify.org?format=json')
     // POST handler to update the user_texts variable for each users ip
     app.post("/userUpdate", function(req, res){
         const id_text_pair = req.body;
-        console.log(id_text_pair);
+        //console.log(id_text_pair);
 
         // Get the deviceID from the cookie or generate a new one
         const deviceID = req.cookies.deviceID || generateUniqueID();
@@ -85,12 +86,33 @@ fetch('https://api.ipify.org?format=json')
         // Update the user_texts variable with the deviceID as the key
         user_texts[deviceID] = id_text_pair.text;
 
+        console.log("\nuser_texts: ")
         console.log(user_texts);
+
+        console.log("\name_id_pairs: ")
+        console.log(name_id_pairs);
 
         // Send a response with the updated user_texts
         res.json(user_texts[deviceID]);
         
     });
+
+    // POST handler to update the name_id_pair variable with a new pair
+    app.post("/setUsername", function(req, res){
+        const username = req.body;
+        
+        // Get the deviceID from the cookie or generate a new one
+        let deviceID = req.cookies.deviceID || generateUniqueID();
+        res.cookie("deviceID", deviceID);
+
+        // Update the user_texts variable with the deviceID as the key
+        name_id_pairs[deviceID] = username.username;
+
+        // Send a response with the updated user_texts
+        res.json(user_texts[deviceID]);
+        
+    });
+    
 
     //GET handler test
     app.get("/getUserText", function(req, res){
