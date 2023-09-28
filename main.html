@@ -11,6 +11,8 @@
 
         <input type="text" placeholder="Enter text here" id="data" name="data">
 
+        <input type="text" placeholder="Enter username here" id="username" name="username">
+
         </div>
 
 
@@ -62,6 +64,11 @@
 
                     let testdiv = document.getElementById("testdiv");
                     let input = document.getElementById("data");
+
+
+                    //Creating username submit button
+                    mainDiv.innerHTML += "<button onclick='setUsername()'>Set Username</button>"
+                    let usernameInput = document.getElementById("username");
 
                     //Begin loop for text control
                     const textUpdateInterval = setInterval(() => {
@@ -150,6 +157,10 @@
                 console.log("you are no longer host.");
                 console.log(isHost);
             }
+        }
+
+        function setUsername() {
+            document.getElementById("username").value;
         }
 
         </script>
