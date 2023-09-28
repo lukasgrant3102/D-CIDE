@@ -123,7 +123,7 @@ fetch('https://api.ipify.org?format=json')
         getData();
     });
 
-    let ip = "10.200.44.230"
+    let ip = "10.200.44.189"
     //Listen for requests at the specified port
     http.listen(PORT, ip, function () {
         console.log('Running at ' + ip + ":" + PORT); 
