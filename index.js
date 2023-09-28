@@ -17,8 +17,9 @@ let currentText = {
     text: "default"
 };
 
-//This is the variable that controls all user text.
+let name_id_pairs = {};
 
+//This is the variable that controls all user text.
 let user_texts = {};
 
 //Must have the user ip to run the program.
@@ -29,6 +30,7 @@ fetch('https://api.ipify.org?format=json')
     //Start main app here.
     user_ip = data.ip;
     console.log(user_ip);
+    let deviceID = "not set";
 
     //Set up express and its middleware
     app.use(cors());
@@ -49,6 +51,15 @@ fetch('https://api.ipify.org?format=json')
     //Basic, unused, GET
     app.get("/", function(req, res){
         res.send("Running at Port " + PORT);
+    });
+
+    //Initial setup
+    app.get("/setup", function(req, res){
+        // Get the deviceID from the cookie or generate a new one
+        deviceID = req.cookies.deviceID || generateUniqueID();
+
+        // Set the deviceID as a cookie to remember it for future requests
+        res.cookie("deviceID", deviceID);
     });
 
     //GET handler test
@@ -77,7 +88,7 @@ fetch('https://api.ipify.org?format=json')
         console.log(id_text_pair);
 
         // Get the deviceID from the cookie or generate a new one
-        const deviceID = req.cookies.deviceID || generateUniqueID();
+        deviceID = req.cookies.deviceID
 
         // Set the deviceID as a cookie to remember it for future requests
         res.cookie("deviceID", deviceID);
