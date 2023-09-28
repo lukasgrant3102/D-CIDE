@@ -19,6 +19,25 @@
         <script>
         let isHost = false;
 
+        //Grab the url of the site to determine where to send api requests.
+        const site_link = window.location.href;
+
+        const regex = /\/\/([^:/]+):(\d+)/;
+        const match = site_link.match(regex);
+        let site_ip = "unknown";
+        let port = 8080;
+
+        if (match) {
+            site_ip = match[1];
+            port = match[2];
+            
+            console.log("IP Address:", site_ip);
+            console.log("Port:", port);
+        }
+        else {
+            console.log("Could not extract the site ip.");
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             
             //Must have user IP before they can run the app
@@ -33,25 +52,6 @@
 
                     //Global variables
                     let currentText;
-
-                    //Grab the url of the site to determine where to send api requests.
-                    const site_link = window.location.href;
-
-                    const regex = /\/\/([^:/]+):(\d+)/;
-                    const match = site_link.match(regex);
-                    let site_ip = "unknown";
-                    let port = 8080;
-
-                    if (match) {
-                        site_ip = match[1];
-                        port = match[2];
-                        
-                        console.log("IP Address:", site_ip);
-                        console.log("Port:", port);
-                    }
-                    else {
-                        console.log("Could not extract the site ip.");
-                    }
 
                     console.log("1")
                     
