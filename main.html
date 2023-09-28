@@ -16,8 +16,9 @@
 
 
         <script>
-            //Get ip
-            let user_ip;
+
+
+        document.addEventListener("DOMContentLoaded", function () {
             
             //Must have user IP before they can run the app
             try {
@@ -26,66 +27,110 @@
                 .then(data => {
 
                     //Start main app here.
-                    user_ip = data.ip;
+                    let user_ip = data.ip;
                     console.log(user_ip);
 
                     //Global variables
                     let currentText;
                     let isHost = false;
 
-                    //Connection
-                    //const ip = "216.249.148.174";
-                    //let ip = "10.200.45.49";
-                    const PORT = 8080; 
+                    //Grab the url of the site to determine where to send api requests.
+                    const site_link = window.location.href;
 
-                    document.addEventListener("DOMContentLoaded", function () {
+                    const regex = /\/\/([^:/]+):(\d+)/;
+                    const match = site_link.match(regex);
+                    let site_ip = "unknown";
+                    let port = 8080;
 
-                        //Creating the host button
-                        let mainDiv = document.getElementById("main");
-                        mainDiv.innerHTML += "<button onclick='setHost()'>Host</button>";
-
-                        let testdiv = document.getElementById("testdiv");
-                        let input = document.getElementById("data");
-
+                    if (match) {
+                        site_ip = match[1];
+                        port = match[2];
                         
-                        const textUpdateInterval = setInterval(() => {
+                        console.log("IP Address:", site_ip);
+                        console.log("Port:", port);
+                    }
+                    else {
+                        console.log("Could not extract the site ip.");
+                    }
 
-                            if(!isHost) {
-                                console.log("is not host");
+                    console.log("1")
+                    
+                    console.log("page loaded");
 
-                                fetch('http://' + ip + ':' + PORT + '/retrieve').then(response => response.json()).then(data => {
-                                    testdiv.innerHTML = data.text;
-                                });
-                            }
-                            else {
-                                console.log("is host");
-                                console.log(input.value);
-                                
-                                const newText = input.value; // Replace with your new text
-                
-                                // Send a POST request to the server to update currentText
-                                fetch('http://' + ip + ':' + PORT + '/update', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({ text: newText }),
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    console.log('Updated currentText:', data);
-                                })
-                                .catch(error => {
-                                    console.error('Error updating currentText:', error);
-                                });
+                    //Creating the host button
+                    let mainDiv = document.getElementById("main");
+                    mainDiv.innerHTML += "<button onclick='setHost()'>Host</button>";
+
+                    let testdiv = document.getElementById("testdiv");
+                    let input = document.getElementById("data");
+
+                    //Begin loop for text control
+                    const textUpdateInterval = setInterval(() => {
+                        console.log("loop");
+
+                        //If the user is not host then it just retrieves the current text data from the host
+                        if(!isHost) {
+                            console.log("is not host");
+
+                            //Retrieve what the host has t
+                            fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
+                                testdiv.innerHTML = data.text;
+                            });
+
+                            //Create the data pair
+                            const userText = input.value; // Replace with your new text
+                            data_pair = new Object();
+                            data_pair[user_ip] = userText;
+                            
+                            // Send a POST request to the server to update the user_texts variable
+                            fetch('http://' + site_ip + ':' + port + '/userUpdate', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(data_pair),
+                                //body: JSON.stringify({ "test here": "test there" }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Updated user_texts:', data);
+                            })
+                            .catch(error => {
+                                console.log('Error updating user_texts:', error);
+                            });
+                            
+                        }
+                        //If the user is the host then it uploads the data in the text box continuously so any non-host user can grab it
+                        else {
+                            console.log("is host");
+                            console.log(input.value);
+                            
+                            const newText = input.value; // Replace with your new text
+            
+                            // Send a POST request to the server to update currentText
+                            fetch('http://' + site_ip + ':' + port + '/update', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ text: newText }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Updated currentText:', data);
+                            })
+                            .catch(error => {
+                                console.error('Error updating currentText:', error);
+                            });
 
                             }
 
                         }, 2000);
-
-
                     });
 
+                    console.log('2');
+
+                    //Toggles the host status of the user.
                     function setHost() {
                         if(!isHost) {
                             isHost = true;
@@ -98,10 +143,11 @@
                             console.log(isHost);
                         }
                     }
-            });
-        } catch (error) {
-            console.error("Error fetching user IP");
-        }
+            
+            } catch (error) {
+                console.error("Error fetching user IP");
+            }
+        });
 
         </script>
     </body>
