@@ -1,11 +1,13 @@
 {
   "dependencies": {
     "bp": "^0.1.1-beta",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "fs": "^0.0.1-security",
     "http": "^0.0.1-security",
     "httpserver": "^0.3.0",
+    "node-fetch": "^2.7.0",
     "path": "^0.12.7"
   }
 }

@@ -16,7 +16,7 @@
 
 
         <script>
-
+        let isHost = false;
 
         document.addEventListener("DOMContentLoaded", function () {
             
@@ -32,7 +32,6 @@
 
                     //Global variables
                     let currentText;
-                    let isHost = false;
 
                     //Grab the url of the site to determine where to send api requests.
                     const site_link = window.location.href;
@@ -72,15 +71,13 @@
                         if(!isHost) {
                             console.log("is not host");
 
-                            //Retrieve what the host has t
+                            //Retrieve what the host has typed
                             fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
                                 testdiv.innerHTML = data.text;
                             });
 
                             //Create the data pair
                             const userText = input.value; // Replace with your new text
-                            data_pair = new Object();
-                            data_pair[user_ip] = userText;
                             
                             // Send a POST request to the server to update the user_texts variable
                             fetch('http://' + site_ip + ':' + port + '/userUpdate', {
@@ -88,12 +85,12 @@
                                 headers: {
                                     'Content-Type': 'application/json',
                                 },
-                                body: JSON.stringify(data_pair),
+                                body: JSON.stringify({text: userText}),
                                 //body: JSON.stringify({ "test here": "test there" }),
                             })
                             .then(response => response.json())
                             .then(data => {
-                                console.log('Updated user_texts:', data);
+                                console.log('Updated user_texts with:', data);
                             })
                             .catch(error => {
                                 console.log('Error updating user_texts:', error);
@@ -103,7 +100,13 @@
                         //If the user is the host then it uploads the data in the text box continuously so any non-host user can grab it
                         else {
                             console.log("is host");
-                            console.log(input.value);
+                            //console.log(input.value);
+
+                            //TEST
+                            fetch('http://' + site_ip + ':' + port + '/getUserText').then(response => response.json()).then(data => {
+                                console.log(data);
+                            });
+                            
                             
                             const newText = input.value; // Replace with your new text
             
@@ -125,29 +128,29 @@
 
                             }
 
-                        }, 2000);
+                        }, 5000);
+
                     });
 
                     console.log('2');
-
-                    //Toggles the host status of the user.
-                    function setHost() {
-                        if(!isHost) {
-                            isHost = true;
-                            console.log("you are now host.");
-                            console.log(isHost);
-                        }
-                        else {
-                            isHost = false;
-                            console.log("you are no longer host.");
-                            console.log(isHost);
-                        }
-                    }
             
             } catch (error) {
                 console.error("Error fetching user IP");
             }
         });
+        //Toggles the host status of the user.
+        function setHost() {
+            if(!isHost) {
+                isHost = true;
+                console.log("you are now host.");
+                console.log(isHost);
+            }
+            else {
+                isHost = false;
+                console.log("you are no longer host.");
+                console.log(isHost);
+            }
+        }
 
         </script>
     </body>

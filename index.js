@@ -9,6 +9,8 @@ const path = require("path");
 const bp = require("body-parser");
 const cors = require("cors");
 const http = require('http').Server(app);
+const fetch = require('node-fetch');
+const cookieParser = require('cookie-parser')
 
 //This is the text at the top of the screen
 let currentText = {
@@ -16,10 +18,8 @@ let currentText = {
 };
 
 //This is the variable that controls all user text.
-let user_texts = new Object();
-user_texts = {"192.164.1.201": "This is a test entry",
-                "192.164.1.202": "This is a test entry also"};
 
+let user_texts = {};
 
 //Must have the user ip to run the program.
 fetch('https://api.ipify.org?format=json')
@@ -32,6 +32,7 @@ fetch('https://api.ipify.org?format=json')
 
     //Set up express and its middleware
     app.use(cors());
+    app.use(cookieParser());
     app.use('/', express.static(path.join(__dirname, './')));
     app.use(bp.json());
     app.use(bp.urlencoded({extended: true}));
@@ -72,20 +73,48 @@ fetch('https://api.ipify.org?format=json')
 
     // POST handler to update the user_texts variable for each users ip
     app.post("/userUpdate", function(req, res){
-        const ip_text_pair = req.body;
-        console.log(ip_text_pair);
-        
-        // Update the currentText variable
-        user_texts[Object.keys(ip_text_pair)[0]] = ip_text_pair[Object.keys(ip_text_pair)[0]];
+        const id_text_pair = req.body;
+        console.log(id_text_pair);
+
+        // Get the deviceID from the cookie or generate a new one
+        const deviceID = req.cookies.deviceID || generateUniqueID();
+
+        // Set the deviceID as a cookie to remember it for future requests
+        res.cookie("deviceID", deviceID);
+
+        // Update the user_texts variable with the deviceID as the key
+        user_texts[deviceID] = id_text_pair.text;
+
         console.log(user_texts);
-        
-        // Send a response with the updated currentText
-        res.json(user_texts[Object.keys(ip_text_pair)[0]]);
+
+        // Send a response with the updated user_texts
+        res.json(user_texts[deviceID]);
         
     });
 
+    //GET handler test
+    app.get("/getUserText", function(req, res){
+        const getData = async () => {
+            res.send(JSON.stringify(user_texts));
+            console.log(user_texts);
+        };
+        getData();
+    });
+
+    let ip = "10.200.44.230"
     //Listen for requests at the specified port
-    http.listen(PORT, user_ip, function () {
-        console.log('Running at ' + user_ip + ":" + PORT); 
+    http.listen(PORT, ip, function () {
+        console.log('Running at ' + ip + ":" + PORT); 
     }); 
 });
+
+
+
+
+// Generate a unique ID for a device
+function generateUniqueID() {
+    // You can use any method to generate a unique ID here.
+    // For simplicity, you can use a random string or a timestamp-based ID.
+    const uniqueID = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    return uniqueID;
+}
