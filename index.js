@@ -118,12 +118,23 @@ fetch('https://api.ipify.org?format=json')
     app.get("/getUserText", function(req, res){
         const getData = async () => {
             res.send(JSON.stringify(user_texts));
-            console.log(user_texts);
+            //console.log(user_texts);
         };
         getData();
     });
 
-    let ip = "10.200.44.189"
+    //GET handler test
+    app.get("/getNamePairs", function(req, res){
+        const getData = async () => {
+            res.send(JSON.stringify(name_id_pairs));
+            //console.log(user_texts);
+        };
+        getData();
+    });
+
+
+    //let ip = "10.200.44.189"
+    let ip = "216.249.148.174"
     //Listen for requests at the specified port
     http.listen(PORT, ip, function () {
         console.log('Running at ' + ip + ":" + PORT); 

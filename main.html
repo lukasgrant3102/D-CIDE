@@ -3,176 +3,204 @@
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
         <script src="inputChange.js"></script>
+        <link rel="stylesheet" href="./styles/styles.css">
     </head>
     <body>
-        <div id="main">
+        <div id="container">
+            <div id="top">
+                This is going to be the top panel.
+            </div>
+                <div id="content">
+                <div id="main">
 
-        <div id="testdiv">blank</div>
+                    <div id="testdiv">blank</div>
 
-        <input type="text" placeholder="Enter text here" id="data" name="data">
-        <input type="text" placeholder="Enter username here" id="username" name="username">
+                    <input type="text" placeholder="Enter text here" id="data" name="data">
+                    <input type="text" placeholder="Enter username here" id="username" name="username">
 
+                </div>
+
+                <!--This is where the mini views of the student screens will go-->
+                <div id="side">
+                    <div class="screen-container">
+                        <div class="mini-screen">
+                            this is some text data that will be shown within the screen. this is some text data that will be shown within the screen. this is some text data that will be shown within the screen.
+                        </div>
+                        <div class="screen-name">Lukas Grant</div>
+                    </div>    
+                </div>
+            </div>
         </div>
 
 
 
         <script>
-        let isHost = false;
+            let isHost = false;
 
-        //Grab the url of the site to determine where to send api requests.
-        const site_link = window.location.href;
+            //Grab the url of the site to determine where to send api requests.
+            const site_link = window.location.href;
 
-        const regex = /\/\/([^:/]+):(\d+)/;
-        const match = site_link.match(regex);
-        let site_ip = "unknown";
-        let port = 8080;
+            const regex = /\/\/([^:/]+):(\d+)/;
+            const match = site_link.match(regex);
+            let site_ip = "unknown";
+            let port = 8080;
 
-        if (match) {
-            site_ip = match[1];
-            port = match[2];
-            
-            console.log("IP Address:", site_ip);
-            console.log("Port:", port);
-        }
-        else {
-            console.log("Could not extract the site ip.");
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            
-            //Must have user IP before they can run the app
-            try {
-                fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => {
-
-                    //Start main app here.
-                    let user_ip = data.ip;
-                    console.log(user_ip);
-
-                    //Global variables
-                    let currentText;
-
-                    console.log("1")
-                    
-                    console.log("page loaded");
-
-                    //Creating the host button
-                    let mainDiv = document.getElementById("main");
-                    mainDiv.innerHTML += "<button onclick='setHost()'>Host</button>";
-                    mainDiv.innerHTML += "<button onclick='setUsername()'>Set username</button>";
-
-                    let testdiv = document.getElementById("testdiv");
-                    let input = document.getElementById("data");
-
-                    //Begin loop for text control
-                    const textUpdateInterval = setInterval(() => {
-                        console.log("loop");
-
-                        //If the user is not host then it just retrieves the current text data from the host
-                        if(!isHost) {
-                            console.log("is not host");
-
-                            //Retrieve what the host has typed
-                            fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
-                                testdiv.innerHTML = data.text;
-                            });
-
-                            //Create the data pair
-                            const userText = input.value; // Replace with your new text
-                            
-                            // Send a POST request to the server to update the user_texts variable
-                            fetch('http://' + site_ip + ':' + port + '/userUpdate', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({text: userText}),
-                                //body: JSON.stringify({ "test here": "test there" }),
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log('Updated user_texts with:', data);
-                            })
-                            .catch(error => {
-                                console.log('Error updating user_texts:', error);
-                            });
-                            
-                        }
-                        //If the user is the host then it uploads the data in the text box continuously so any non-host user can grab it
-                        else {
-                            console.log("is host");
-                            //console.log(input.value);
-
-                            //TEST
-                            fetch('http://' + site_ip + ':' + port + '/getUserText').then(response => response.json()).then(data => {
-                                console.log(data);
-                            });
-                            
-                            
-                            const newText = input.value; // Replace with your new text
-            
-                            // Send a POST request to the server to update currentText
-                            fetch('http://' + site_ip + ':' + port + '/update', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ text: newText }),
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log('Updated currentText:', data);
-                            })
-                            .catch(error => {
-                                console.error('Error updating currentText:', error);
-                            });
-
-                            }
-
-                        }, 5000);
-
-                    });
-
-                    console.log('2');
-            
-            } catch (error) {
-                console.error("Error fetching user IP");
-            }
-        });
-        //Toggles the host status of the user.
-        function setHost() {
-            if(!isHost) {
-                isHost = true;
-                console.log("you are now host.");
-                console.log(isHost);
+            if (match) {
+                site_ip = match[1];
+                port = match[2];
+                
+                console.log("IP Address:", site_ip);
+                console.log("Port:", port);
             }
             else {
-                isHost = false;
-                console.log("you are no longer host.");
-                console.log(isHost);
+                console.log("Could not extract the site ip.");
             }
-        }
 
-        function setUsername() {
-            let usernameInput = document.getElementById("username").value;
-            console.log("this is the username: " + usernameInput);
+            document.addEventListener("DOMContentLoaded", function () {
+                
+                //Must have user IP before they can run the app
+                try {
+                    fetch('https://api.ipify.org?format=json')
+                    .then(response => response.json())
+                    .then(data => {
 
-            fetch('http://' + site_ip + ':' + port + '/setUsername', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ "username": usernameInput }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Updated user:', data);
-            })
-            .catch(error => {
-                console.error('Error updating currentText:', error);
+                        //Start main app here.
+                        let user_ip = data.ip;
+                        console.log(user_ip);
+
+                        //Global variables
+                        let currentText;
+
+                        console.log("1")
+                        
+                        console.log("page loaded");
+
+                        //Creating the host button
+                        let mainDiv = document.getElementById("main");
+                        mainDiv.innerHTML += "<button onclick='setHost()'>Host</button>";
+                        mainDiv.innerHTML += "<button onclick='setUsername()'>Set username</button>";
+
+                        let testdiv = document.getElementById("testdiv");
+                        let input = document.getElementById("data");
+
+                        //Begin loop for text control
+                        const textUpdateInterval = setInterval(() => {
+                            console.log("loop");
+
+                            //If the user is not host then it just retrieves the current text data from the host
+                            if(!isHost) {
+                                console.log("is not host");
+
+                                //Retrieve what the host has typed
+                                fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
+                                    testdiv.innerHTML = data.text;
+                                });
+
+                                //Create the data pair
+                                const userText = input.value; // Replace with your new text
+                                
+                                // Send a POST request to the server to update the user_texts variable
+                                fetch('http://' + site_ip + ':' + port + '/userUpdate', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({text: userText}),
+                                    //body: JSON.stringify({ "test here": "test there" }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log('Updated user_texts with:', data);
+                                })
+                                .catch(error => {
+                                    console.log('Error updating user_texts:', error);
+                                });
+                                
+                            }
+                            //If the user is the host then it uploads the data in the text box continuously so any non-host user can grab it
+                            else {
+                                console.log("is host");
+                                //console.log(input.value);
+
+                                
+                                const newText = input.value; // Replace with your new text
+                
+                                // Send a POST request to the server to update currentText
+                                fetch('http://' + site_ip + ':' + port + '/update', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ text: newText }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log('Updated currentText:', data);
+                                })
+                                .catch(error => {
+                                    console.error('Error updating currentText:', error);
+                                });
+
+
+                                //TEST
+                                fetch('http://' + site_ip + ':' + port + '/getUserText').then(response => response.json()).then(data => {
+                                    let user_texts = data;
+                                    fetch('http://' + site_ip + ':' + port + '/getNamePairs').then(response => response.json()).then(pairs => {
+                                        let name_pairs = pairs;
+
+                                        console.log("fetch complete");
+                                    });
+                                });
+
+
+
+
+
+                                }
+
+                            }, 5000);
+
+                        });
+
+                        console.log('2');
+                
+                } catch (error) {
+                    console.error("Error fetching user IP");
+                }
             });
-        }
+            //Toggles the host status of the user.
+            function setHost() {
+                if(!isHost) {
+                    isHost = true;
+                    console.log("you are now host.");
+                    console.log(isHost);
+                }
+                else {
+                    isHost = false;
+                    console.log("you are no longer host.");
+                    console.log(isHost);
+                }
+            }
+
+            function setUsername() {
+                let usernameInput = document.getElementById("username").value;
+                console.log("this is the username: " + usernameInput);
+
+                fetch('http://' + site_ip + ':' + port + '/setUsername', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ "username": usernameInput }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Updated user:', data);
+                })
+                .catch(error => {
+                    console.error('Error updating currentText:', error);
+                });
+            }
 
         </script>
     </body>

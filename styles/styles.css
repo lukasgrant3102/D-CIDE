@@ -1,0 +1,67 @@
+html, body {
+    margin: 0px;
+    height: 100%;
+    width: 100%;
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+#top {
+    height: 8%;
+    width: 100%;
+    color: green;
+}
+
+#content {
+    display: flex;
+    height: 92%;
+    width: 100%; /* Ensure content div takes the full width */
+}
+
+#main {
+    background-color: red;
+    height: 100%;
+    width: 75%;
+}
+
+#side {
+    display: flex;
+    flex-wrap: wrap;
+    height: 100%;
+    width: 25%;
+    max-width: 25%;
+    background-color: rgb(184, 184, 184);
+    justify-content: center;
+    align-content: flex-start;
+    overflow-y: auto;
+}
+
+.screen-container{
+    width: 40%;
+    height: 12%;
+    margin: 10px;
+    margin-bottom: 35px;
+}
+
+.mini-screen {
+    width: 90%;
+    height: 80%;
+    border: 2px solid black;
+    border-radius: 25px;
+    background-color: white;
+    font-size: 8px;
+    padding: 9px;
+}
+
+.mini-screen:hover {
+    border: 2px solid yellow;
+}
+
+.screen-name {
+    margin-left: 8px;
+}
