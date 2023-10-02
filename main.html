@@ -148,7 +148,16 @@
                                     fetch('http://' + site_ip + ':' + port + '/getNamePairs').then(response => response.json()).then(pairs => {
                                         let name_pairs = pairs;
 
-                                        console.log("fetch complete");
+                                        let user_id;
+                                        let user_name;
+
+                                        name_pairs.array.forEach(pair => {
+                                            user_id = pair.name;
+                                            console.log(user_id);
+                                            user_name = pair.value;
+                                            console.log(user_name);
+                                        });
+                                        
                                     });
                                 });
 
