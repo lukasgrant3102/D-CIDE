@@ -13,10 +13,9 @@
                 <div id="content">
                 <div id="main">
 
-                    <div id="testdiv">blank</div>
-
-                    <input type="text" placeholder="Enter text here" id="data" name="data">
-                    <input type="text" placeholder="Enter username here" id="username" name="username">
+                    <input type="text" placeholder="Enter name here" id="username" name="username">
+                    <button onclick='setUsername()' id="join_button">Join</button>
+                    
 
                 </div>
 
@@ -74,8 +73,7 @@
                         mainDiv.innerHTML += "<button onclick='setHost()'>Host</button>";
                         mainDiv.innerHTML += "<button onclick='setUsername()'>Set username</button>";
 
-                        let testdiv = document.getElementById("testdiv");
-                        let input = document.getElementById("data");
+                        //let testdiv = document.getElementById("testdiv");
 
                         //Begin loop for text control
                         const textUpdateInterval = setInterval(() => {
@@ -85,101 +83,110 @@
                             if(!isHost) {
                                 console.log("is not host");
 
-                                //Retrieve what the host has typed
-                                fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
-                                    testdiv.innerHTML = data.text;
-                                });
+                                //Create the inner html for the user
 
-                                //Create the data pair
-                                const userText = input.value; // Replace with your new text
-                                
-                                // Send a POST request to the server to update the user_texts variable
-                                fetch('http://' + site_ip + ':' + port + '/userUpdate', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({text: userText}),
-                                    //body: JSON.stringify({ "test here": "test there" }),
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    console.log('Updated user_texts with:', data);
-                                })
-                                .catch(error => {
-                                    console.log('Error updating user_texts:', error);
-                                });
-                                
+                                let input = document.getElementById("user_input_area");
+                                //If the user has set their name, then the rest of the code will run.
+                                if(input) {
+                                    //Retrieve what the host has typed
+                                    fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
+                                        input.value = data.text;
+                                    });
+
+                                    //Create the data pair
+                                    const userText = input.value; // Replace with your new text
+                                    
+                                    // Send a POST request to the server to update the user_texts variable
+                                    fetch('http://' + site_ip + ':' + port + '/userUpdate', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({text: userText}),
+                                        //body: JSON.stringify({ "test here": "test there" }),
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        console.log('Updated user_texts with:', data);
+                                    })
+                                    .catch(error => {
+                                        console.log('Error updating user_texts:', error);
+                                    });
+                                }   
                             }
                             //If the user is the host then it uploads the data in the text box continuously so any non-host user can grab it
                             else {
                                 console.log("is host");
                                 //console.log(input.value);
-
+                                let input = document.getElementById("user_input_area");
+                                if(input) {
+                                    console.log("input detected");
                                 
-                                const newText = input.value; // Replace with your new text
-                
-                                // Send a POST request to the server to update currentText
-                                fetch('http://' + site_ip + ':' + port + '/update', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({ text: newText }),
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    console.log('Updated currentText:', data);
-                                })
-                                .catch(error => {
-                                    console.error('Error updating currentText:', error);
-                                });
-
-
-                                //TEST
-                                fetch('http://' + site_ip + ':' + port + '/getUserText').then(response => response.json()).then(data => {
-                                    console.log(data);
-                                    let user_texts = data;
-                                    fetch('http://' + site_ip + ':' + port + '/getNamePairs').then(response => response.json()).then(pairs => {
-                                        let name_pairs = pairs;
-
-                                        let user_texts_dupe = user_texts;
-            
-
-                                        //console.log(name_pairs);
-                                        for(const user_id in user_texts) {
-                                            let user_text = user_texts[user_id];
-                                            let user_name = name_pairs[user_id];
-                                            console.log(`User ID: ${user_id}, Name: ${user_name}, Text: ${user_text}`);
-
-                                            let side = document.getElementById('side');
-                                            let tryScreen = document.getElementById('screen-container-' + user_id);
-                                            if(!tryScreen) {
-
-                                                side.innerHTML += "<div class='screen-container' id='screen-container-" + user_id +"'> <div class='mini-screen'>this is some text data that will be shown within the screen.</div><div class='screen-name'>" + user_name + "</div> </div>"   
-
-                                            }
-                                            else {
-                                                tryScreen.children[0].innerHTML = user_text;
-                                            }
-                                        }
-
-                                        
-                                        
+                                    const newText = input.value; // Replace with your new text
+                    
+                                    // Send a POST request to the server to update currentText
+                                    fetch('http://' + site_ip + ':' + port + '/update', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({ text: newText }),
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        console.log('Updated currentText:', data);
+                                    })
+                                    .catch(error => {
+                                        console.error('Error updating currentText:', error);
                                     });
-                                });
 
 
+                                    //TEST
+                                    fetch('http://' + site_ip + ':' + port + '/getUserText').then(response => response.json()).then(data => {
+                                        console.log(data);
+                                        let user_texts = data;
+                                        fetch('http://' + site_ip + ':' + port + '/getNamePairs').then(response => response.json()).then(pairs => {
+                                            let name_pairs = pairs;
 
 
+                                            
+                                            fetch('http://' + site_ip + ':' + port + '/getUserId').then(response => response.json()).then(id => {
+                                                let host_id = id;
+                                                console.log("host id: " + host_id);
+                                            
 
+                                                //console.log(name_pairs);
+                                                for(const user_id in user_texts) {
+                                                    let user_text = user_texts[user_id];
+                                                    let user_name = name_pairs[user_id];
+                                                    console.log(`User ID: ${user_id}, Name: ${user_name}, Text: ${user_text}`);
+
+                                                    //Only attempt to display a screen if the name has been selected by the user.
+                                                    if(user_name){
+                                                        //Create mini screens for all except host.
+                                                        if(!(user_id==host_id)){
+                                                            let side = document.getElementById('side');
+                                                            let tryScreen = document.getElementById('screen-container-' + user_id);
+                                                            if(!tryScreen) {
+
+                                                                side.innerHTML += "<div class='screen-container' id='screen-container-" + user_id +"'> <div class='mini-screen'>this is some text data that will be shown within the screen.</div><div class='screen-name'>" + user_name + "</div> </div>"   
+
+                                                            }
+                                                            else {
+                                                                tryScreen.children[0].innerHTML = user_text;
+                                                                tryScreen.children[1].innerHTML = user_name;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            });                                       
+                                        });
+                                    });
                                 }
-
-                            }, 5000);
-
-                        });
-
-                        console.log('2');
+                            }
+                        }, 5000);
+                    });
+                    console.log('2');
                 
                 } catch (error) {
                     console.error("Error fetching user IP");
@@ -203,6 +210,10 @@
                 let usernameInput = document.getElementById("username").value;
                 console.log("this is the username: " + usernameInput);
 
+                let main = document.getElementById("main");
+                main.innerHTML = "<textarea rows='20' columns='800' id='user_input_area'></textarea>";
+
+            
                 fetch('http://' + site_ip + ':' + port + '/setUsername', {
                     method: 'POST',
                     headers: {

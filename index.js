@@ -60,6 +60,17 @@ fetch('https://api.ipify.org?format=json')
         getData();
     });
 
+    //Get the user's device ID
+    //GET handler test
+    app.get("/getUserId", function(req, res){
+        const getData = async () => {
+            const deviceID = req.cookies.deviceID || generateUniqueID();
+            res.send(JSON.stringify(deviceID));
+        };
+        getData();
+    });
+
+
     // POST handler to update currentText
     app.post("/update", function(req, res){
         const { text } = req.body;
@@ -100,6 +111,7 @@ fetch('https://api.ipify.org?format=json')
     // POST handler to update the name_id_pair variable with a new pair
     app.post("/setUsername", function(req, res){
         const username = req.body;
+        console.log("req: " + username);
         
         // Get the deviceID from the cookie or generate a new one
         let deviceID = req.cookies.deviceID || generateUniqueID();
@@ -133,7 +145,7 @@ fetch('https://api.ipify.org?format=json')
     });
 
 
-    let ip = "10.200.46.248"
+    let ip = "10.200.45.183"
     //let ip = "216.249.148.174"
     //Listen for requests at the specified port
     http.listen(PORT, ip, function () {

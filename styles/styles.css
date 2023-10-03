@@ -4,9 +4,17 @@ html, body {
     width: 100%;
 }
 
+input:focus,
+select:focus,
+textarea:focus
+{
+    outline: none;
+}
+
 #container {
     display: flex;
     flex-direction: column;
+    
     height: 100%;
     width: 100%;
 }
@@ -64,4 +72,50 @@ html, body {
 
 .screen-name {
     margin-left: 8px;
+}
+
+#user_input_area {
+    display: block;
+    margin: 35px;
+    resize: none;
+
+    margin-left: auto;
+    margin-right: auto;
+    width: 93%;
+    height: 75%;
+}
+
+#username {
+    display: block;
+
+    width: 30%;
+    height: 10%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 17%;
+
+    border-radius: 20px;
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+#join_button {
+    display: block;
+    background-color: rgb(43, 255, 75);
+
+    width: 15%;
+    height: 7%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5px;
+
+    border-radius: 30px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#join_button:hover {
+    background-color: rgb(39, 234, 69);;
 }
