@@ -21,13 +21,7 @@
                 </div>
 
                 <!--This is where the mini views of the student screens will go-->
-                <div id="side">
-                    <div class="screen-container">
-                        <div class="mini-screen">
-                            this is some text data that will be shown within the screen. this is some text data that will be shown within the screen. this is some text data that will be shown within the screen.
-                        </div>
-                        <div class="screen-name">Lukas Grant</div>
-                    </div>    
+                <div id="side">   
                 </div>
             </div>
         </div>
@@ -144,19 +138,33 @@
 
                                 //TEST
                                 fetch('http://' + site_ip + ':' + port + '/getUserText').then(response => response.json()).then(data => {
+                                    console.log(data);
                                     let user_texts = data;
                                     fetch('http://' + site_ip + ':' + port + '/getNamePairs').then(response => response.json()).then(pairs => {
                                         let name_pairs = pairs;
 
-                                        let user_id;
-                                        let user_name;
+                                        let user_texts_dupe = user_texts;
+            
 
-                                        name_pairs.array.forEach(pair => {
-                                            user_id = pair.name;
-                                            console.log(user_id);
-                                            user_name = pair.value;
-                                            console.log(user_name);
-                                        });
+                                        //console.log(name_pairs);
+                                        for(const user_id in user_texts) {
+                                            let user_text = user_texts[user_id];
+                                            let user_name = name_pairs[user_id];
+                                            console.log(`User ID: ${user_id}, Name: ${user_name}, Text: ${user_text}`);
+
+                                            let side = document.getElementById('side');
+                                            let tryScreen = document.getElementById('screen-container-' + user_id);
+                                            if(!tryScreen) {
+
+                                                side.innerHTML += "<div class='screen-container' id='screen-container-" + user_id +"'> <div class='mini-screen'>this is some text data that will be shown within the screen.</div><div class='screen-name'>" + user_name + "</div> </div>"   
+
+                                            }
+                                            else {
+                                                tryScreen.children[0].innerHTML = user_text;
+                                            }
+                                        }
+
+                                        
                                         
                                     });
                                 });
