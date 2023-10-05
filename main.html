@@ -30,7 +30,6 @@
 
         <script>
             let isHost = false;
-            let isSharing = true;
 
             //Grab the url of the site to determine where to send api requests.
             const site_link = window.location.href;
@@ -79,119 +78,124 @@
                         const textUpdateInterval = setInterval(() => {
                             console.log("loop");
 
-                            //If the user is not host then it just retrieves the current text data from the host
-                            if(!isHost) {
-                                console.log("is not host");
+                            fetch('http://' + site_ip + ':' + port + '/getShareStatus').then(response => response.json()).then(data => {
+                                let isSharing = data;
 
-                                //Create the inner html for the user
+                                //If the user is not host then it just retrieves the current text data from the host
+                                if(!isHost) {
+                                    console.log("is not host");
 
-                                let input = document.getElementById("user_input_area");
-                                //If the user has set their name, then the rest of the code will run.
-                                if(input) {
-                                    //Only duplicate onto student screens if host is sharing
-                                    if(isSharing) {
-                                        //Retrieve what the host has typed
-                                        fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
-                                            input.value = data.text;
-                                        });
-                                    }
+                                    //Create the inner html for the user
+
+                                    let input = document.getElementById("user_input_area");
+                                    //If the user has set their name, then the rest of the code will run.
+                                    if(input) {
+
+                                        //Only duplicate onto student screens if host is sharing
+                                        if(isSharing) {
+                                            //Retrieve what the host has typed
+                                            fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
+                                                input.value = data.text;
+                                            });
+                                        }
 
 
-                                    //Create the data pair
-                                    const userText = input.value; // Replace with your new text
-                                    
-                                    // Send a POST request to the server to update the user_texts variable
-                                    fetch('http://' + site_ip + ':' + port + '/userUpdate', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        },
-                                        body: JSON.stringify({text: userText}),
-                                        //body: JSON.stringify({ "test here": "test there" }),
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        console.log('Updated user_texts with:', data);
-                                    })
-                                    .catch(error => {
-                                        console.log('Error updating user_texts:', error);
-                                    });
-                                }   
-                            }
-                            //If the user is the host then it uploads the data in the text box continuously so any non-host user can grab it
-                            else {
-                                console.log("is host");
-                                let input = document.getElementById("user_input_area");
-                                //Only try to share if the host is off the username set screen
-                                if(input) {
-                                    //Only share if the host has the program set to do so
-                                    if(isSharing) {
-                                        //This section takes care of sharing the text with all connected users.
-                                        console.log("input detected");
-                                    
-                                        const newText = input.value;
-                        
-                                        // Send a POST request to the server to update currentText
-                                        fetch('http://' + site_ip + ':' + port + '/update', {
+                                        //Create the data pair
+                                        const userText = input.value; // Replace with your new text
+                                        
+                                        // Send a POST request to the server to update the user_texts variable
+                                        fetch('http://' + site_ip + ':' + port + '/userUpdate', {
                                             method: 'POST',
                                             headers: {
                                                 'Content-Type': 'application/json',
                                             },
-                                            body: JSON.stringify({ text: newText }),
+                                            body: JSON.stringify({text: userText}),
+                                            //body: JSON.stringify({ "test here": "test there" }),
                                         })
                                         .then(response => response.json())
                                         .then(data => {
-                                            console.log('Updated currentText:', data);
+                                            console.log('Updated user_texts with:', data);
                                         })
                                         .catch(error => {
-                                            console.error('Error updating currentText:', error);
+                                            console.log('Error updating user_texts:', error);
                                         });
-                                    }
+                                    }   
+                                }
+                                //If the user is the host then it uploads the data in the text box continuously so any non-host user can grab it
+                                else {
+                                    console.log("is host");
+                                    let input = document.getElementById("user_input_area");
+                                    //Only try to share if the host is off the username set screen
+                                    if(input) {
+                                        //Only share if the host has the program set to do so
+                                        if(isSharing) {
+                                            //This section takes care of sharing the text with all connected users.
+                                            console.log("input detected");
+                                        
+                                            const newText = input.value;
+                            
+                                            // Send a POST request to the server to update currentText
+                                            fetch('http://' + site_ip + ':' + port + '/update', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                },
+                                                body: JSON.stringify({ text: newText }),
+                                            })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                console.log('Updated currentText:', data);
+                                            })
+                                            .catch(error => {
+                                                console.error('Error updating currentText:', error);
+                                            });
+                                        }
 
 
-                                    //This section takes care of creating the mini screens in the side panel for the host
-                                    fetch('http://' + site_ip + ':' + port + '/getUserText').then(response => response.json()).then(data => {
-                                        console.log(data);
-                                        let user_texts = data;
-                                        fetch('http://' + site_ip + ':' + port + '/getNamePairs').then(response => response.json()).then(pairs => {
-                                            let name_pairs = pairs;
+                                        //This section takes care of creating the mini screens in the side panel for the host
+                                        fetch('http://' + site_ip + ':' + port + '/getUserText').then(response => response.json()).then(data => {
+                                            console.log(data);
+                                            let user_texts = data;
+                                            fetch('http://' + site_ip + ':' + port + '/getNamePairs').then(response => response.json()).then(pairs => {
+                                                let name_pairs = pairs;
 
 
-                                            
-                                            fetch('http://' + site_ip + ':' + port + '/getUserId').then(response => response.json()).then(id => {
-                                                let host_id = id;
-                                                console.log("host id: " + host_id);
-                                            
+                                                
+                                                fetch('http://' + site_ip + ':' + port + '/getUserId').then(response => response.json()).then(id => {
+                                                    let host_id = id;
+                                                    console.log("host id: " + host_id);
+                                                
 
-                                                //console.log(name_pairs);
-                                                for(const user_id in user_texts) {
-                                                    let user_text = user_texts[user_id];
-                                                    let user_name = name_pairs[user_id];
-                                                    console.log(`User ID: ${user_id}, Name: ${user_name}, Text: ${user_text}`);
+                                                    //console.log(name_pairs);
+                                                    for(const user_id in user_texts) {
+                                                        let user_text = user_texts[user_id];
+                                                        let user_name = name_pairs[user_id];
+                                                        console.log(`User ID: ${user_id}, Name: ${user_name}, Text: ${user_text}`);
 
-                                                    //Only attempt to display a screen if the name has been selected by the user.
-                                                    if(user_name){
-                                                        //Create mini screens for all except host.
-                                                        if(!(user_id==host_id)){
-                                                            let side = document.getElementById('side');
-                                                            let tryScreen = document.getElementById('screen-container-' + user_id);
-                                                            if(!tryScreen) {
+                                                        //Only attempt to display a screen if the name has been selected by the user.
+                                                        if(user_name){
+                                                            //Create mini screens for all except host.
+                                                            if(!(user_id==host_id)){
+                                                                let side = document.getElementById('side');
+                                                                let tryScreen = document.getElementById('screen-container-' + user_id);
+                                                                if(!tryScreen) {
 
-                                                                side.innerHTML += "<div class='screen-container' id='screen-container-" + user_id +"'> <div class='mini-screen'>this is some text data that will be shown within the screen.</div><div class='screen-name'>" + user_name + "</div> </div>"   
+                                                                    side.innerHTML += "<div class='screen-container' id='screen-container-" + user_id +"'> <div class='mini-screen'>this is some text data that will be shown within the screen.</div><div class='screen-name'>" + user_name + "</div> </div>"   
 
-                                                            }
-                                                            else {
-                                                                tryScreen.children[0].innerHTML = user_text;
-                                                                tryScreen.children[1].innerHTML = user_name;
+                                                                }
+                                                                else {
+                                                                    tryScreen.children[0].innerHTML = user_text;
+                                                                    tryScreen.children[1].innerHTML = user_name;
+                                                                }
                                                             }
                                                         }
                                                     }
-                                                }
-                                            });                                       
+                                                });                                       
+                                            });
                                         });
-                                    });
+                                    }
                                 }
-                            }
+                            });
                         }, 5000);
                     });
                     console.log('2');
@@ -250,17 +254,22 @@
             //Lets the host toggle if they are sharing their text to all users
             function toggleShare() {
                 let shareButton = document.getElementById('share_button');
-                
-                if(isSharing) {
-                    isSharing = false;
-                    shareButton.style.backgroundColor = "rgb(255, 67, 67)";
-                    shareButton.textContent = "Sharing: Off";
-                }
-                else if(!isSharing) {
-                    isSharing = true;
-                    shareButton.style.backgroundColor = "rgb(0, 255, 38)";
-                    shareButton.textContent = "Sharing: On";
-                }
+                //Get the current share status
+                fetch('http://' + site_ip + ':' + port + '/getShareStatus').then(response => response.json()).then(data => {
+                    let isSharing = data;
+
+                    
+                    if(isSharing) {
+                        fetch('http://' + site_ip + ':' + port + '/toggleSharing').then(response => response.json()).then(data => {});
+                        shareButton.style.backgroundColor = "rgb(255, 67, 67)";
+                        shareButton.textContent = "Sharing: Off";
+                    }
+                    else if(!isSharing) {
+                        fetch('http://' + site_ip + ':' + port + '/toggleSharing').then(response => response.json()).then(data => {});
+                        shareButton.style.backgroundColor = "rgb(0, 255, 38)";
+                        shareButton.textContent = "Sharing: On";
+                    }
+                });
             }
 
         </script>

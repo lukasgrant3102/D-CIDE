@@ -21,6 +21,7 @@ let currentText = {
 
 let user_texts = {};
 let name_id_pairs = {};
+let isSharing = true;
 
 //Must have the user ip to run the program.
 fetch('https://api.ipify.org?format=json')
@@ -143,6 +144,28 @@ fetch('https://api.ipify.org?format=json')
         };
         getData();
     });
+
+    //Toggles the isSharing variable.
+    app.get("/toggleSharing", function(req, res){
+        const getData = async () => {
+            if(isSharing) {
+                isSharing = false;
+            }
+            else if(!isSharing) {
+                isSharing = true;
+            }
+        };
+        getData();
+    });
+
+    //Returns the current value of isSharing
+    app.get("/getShareStatus", function(req, res){
+        const getData = async () => {
+            res.send(JSON.stringify(isSharing));
+        };
+        getData();
+    });
+
 
 
     let ip = "10.200.45.183"
