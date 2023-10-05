@@ -15,6 +15,7 @@
 
                     <input type="text" placeholder="Enter name here" id="username" name="username">
                     <button onclick='setUsername()' id="join_button">Join</button>
+                    <button onclick='setHost()' id='host_button'>Join as Host</button>
                     
 
                 </div>
@@ -29,6 +30,7 @@
 
         <script>
             let isHost = false;
+            let isSharing = true;
 
             //Grab the url of the site to determine where to send api requests.
             const site_link = window.location.href;
@@ -70,8 +72,6 @@
 
                         //Creating the host button
                         let mainDiv = document.getElementById("main");
-                        mainDiv.innerHTML += "<button onclick='setHost()'>Host</button>";
-                        mainDiv.innerHTML += "<button onclick='setUsername()'>Set username</button>";
 
                         //let testdiv = document.getElementById("testdiv");
 
@@ -88,10 +88,14 @@
                                 let input = document.getElementById("user_input_area");
                                 //If the user has set their name, then the rest of the code will run.
                                 if(input) {
-                                    //Retrieve what the host has typed
-                                    fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
-                                        input.value = data.text;
-                                    });
+                                    //Only duplicate onto student screens if host is sharing
+                                    if(isSharing) {
+                                        //Retrieve what the host has typed
+                                        fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
+                                            input.value = data.text;
+                                        });
+                                    }
+
 
                                     //Create the data pair
                                     const userText = input.value; // Replace with your new text
@@ -117,31 +121,35 @@
                             //If the user is the host then it uploads the data in the text box continuously so any non-host user can grab it
                             else {
                                 console.log("is host");
-                                //console.log(input.value);
                                 let input = document.getElementById("user_input_area");
+                                //Only try to share if the host is off the username set screen
                                 if(input) {
-                                    console.log("input detected");
-                                
-                                    const newText = input.value; // Replace with your new text
-                    
-                                    // Send a POST request to the server to update currentText
-                                    fetch('http://' + site_ip + ':' + port + '/update', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        },
-                                        body: JSON.stringify({ text: newText }),
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        console.log('Updated currentText:', data);
-                                    })
-                                    .catch(error => {
-                                        console.error('Error updating currentText:', error);
-                                    });
+                                    //Only share if the host has the program set to do so
+                                    if(isSharing) {
+                                        //This section takes care of sharing the text with all connected users.
+                                        console.log("input detected");
+                                    
+                                        const newText = input.value;
+                        
+                                        // Send a POST request to the server to update currentText
+                                        fetch('http://' + site_ip + ':' + port + '/update', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                            },
+                                            body: JSON.stringify({ text: newText }),
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            console.log('Updated currentText:', data);
+                                        })
+                                        .catch(error => {
+                                            console.error('Error updating currentText:', error);
+                                        });
+                                    }
 
 
-                                    //TEST
+                                    //This section takes care of creating the mini screens in the side panel for the host
                                     fetch('http://' + site_ip + ':' + port + '/getUserText').then(response => response.json()).then(data => {
                                         console.log(data);
                                         let user_texts = data;
@@ -199,35 +207,60 @@
                     console.log("you are now host.");
                     console.log(isHost);
                 }
-                else {
-                    isHost = false;
-                    console.log("you are no longer host.");
-                    console.log(isHost);
-                }
+                //else {
+                    //isHost = false;
+                    //console.log("you are no longer host.");
+                    //console.log(isHost);
+                //}
+                setUsername();
+
+                let main = document.getElementById("main");
+                main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";
+                
             }
 
             function setUsername() {
                 let usernameInput = document.getElementById("username").value;
-                console.log("this is the username: " + usernameInput);
 
-                let main = document.getElementById("main");
-                main.innerHTML = "<textarea rows='20' columns='800' id='user_input_area'></textarea>";
+                //Only let the user join if they have chosen a name
+                if(usernameInput.length > 0) {
+                    console.log("this is the username: " + usernameInput);
 
-            
-                fetch('http://' + site_ip + ':' + port + '/setUsername', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ "username": usernameInput }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Updated user:', data);
-                })
-                .catch(error => {
-                    console.error('Error updating currentText:', error);
-                });
+                    let main = document.getElementById("main");
+                    main.innerHTML = "<textarea rows='20' columns='800' id='user_input_area'></textarea>";
+
+                
+                    fetch('http://' + site_ip + ':' + port + '/setUsername', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ "username": usernameInput }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Updated user:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error updating currentText:', error);
+                    });
+                }
+            }
+
+            //Lets the host toggle if they are sharing their text to all users
+            function toggleShare() {
+                let shareButton = document.getElementById('share_button');
+                
+                if(isSharing) {
+                    isSharing = false;
+                    shareButton.style.backgroundColor = "rgb(255, 67, 67)";
+                    shareButton.textContent = "Sharing: Off";
+                }
+                else if(!isSharing) {
+                    isSharing = true;
+                    shareButton.style.backgroundColor = "rgb(0, 255, 38)";
+                    shareButton.textContent = "Sharing: On";
+                }
             }
 
         </script>
