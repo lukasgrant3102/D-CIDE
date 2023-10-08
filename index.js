@@ -22,6 +22,10 @@ let currentText = {
 let user_texts = {};
 let name_id_pairs = {};
 let isSharing = true;
+let isEditing = false;
+
+let soloText = "";
+let currentSharingID = "";
 
 //Must have the user ip to run the program.
 fetch('https://api.ipify.org?format=json')
@@ -72,6 +76,8 @@ fetch('https://api.ipify.org?format=json')
     });
 
 
+
+
     // POST handler to update currentText
     app.post("/update", function(req, res){
         const { text } = req.body;
@@ -98,11 +104,12 @@ fetch('https://api.ipify.org?format=json')
         // Update the user_texts variable with the deviceID as the key
         user_texts[deviceID] = id_text_pair.text;
 
-        console.log("\nuser_texts: ")
-        console.log(user_texts);
+        //console.log("\nuser_texts: ")
+        //console.log(user_texts);
+        console.log("isSharing: " + isSharing);
 
-        console.log("\name_id_pairs: ")
-        console.log(name_id_pairs);
+        //console.log("\nname_id_pairs: ")
+        //console.log(name_id_pairs);
 
         // Send a response with the updated user_texts
         res.json(user_texts[deviceID]);
@@ -110,22 +117,46 @@ fetch('https://api.ipify.org?format=json')
     });
 
     // POST handler to update a specific user_text variable based on id
-    app.post("/userUpdate/:user_id", function(req, res){
+    app.post("/userUpdate/send", function(req, res){
         const newText = req.body.text;
-        const id = req.params.user_id;
+        console.log(newText);
 
         // Update the user_texts variable with the deviceID as the key
-        user_texts[id] = newText;
+        soloText = newText;
 
         // Send a response with the updated user_texts
         res.json(newText);
         
     });
 
+    app.get("/userUpdate/retrieve", function(req, res){
+        const getData = async () => {
+            res.send(JSON.stringify(soloText));
+        };
+        getData();
+    });
+
+    //Sets the current sharing id on the server
+    app.get("/setSharingID/:new_id", function(req, res){
+        const getData = async () => {
+            currentSharingID = req.params.new_id;
+        };
+        getData();
+    });
+
+    //Retrieves the current sharing id from the server
+    app.get("/getSharingID", function(req, res){
+        const getData = async () => {
+            res.send(JSON.stringify(currentSharingID));
+        };
+        getData();
+    });
+    
+
     // POST handler to update the name_id_pair variable with a new pair
     app.post("/setUsername", function(req, res){
         const username = req.body;
-        console.log("req: " + username);
+        console.log("req: " + username.username);
         
         // Get the deviceID from the cookie or generate a new one
         let deviceID = req.cookies.deviceID || generateUniqueID();
@@ -152,6 +183,7 @@ fetch('https://api.ipify.org?format=json')
     //GET a specific user text based on id
     app.get("/getUserText/:user_id", function(req, res){
         const getData = async () => {
+            console.log("Getting by user id: " + user_texts[req.params.user_id]);
             res.send(JSON.stringify(user_texts[req.params.user_id]));
         };
         getData();
@@ -169,14 +201,37 @@ fetch('https://api.ipify.org?format=json')
     });
 
     //Toggles the isSharing variable.
-    app.get("/toggleSharing", function(req, res){
+    app.get("/toggleSharing/:value", function(req, res){
         const getData = async () => {
-            if(isSharing) {
-                isSharing = false;
-            }
-            else if(!isSharing) {
+            if(req.params.value =="true") {
                 isSharing = true;
+                console.log("The value was flipped to true");
             }
+            else if(req.params.value == "false") {
+                isSharing = false;
+                console.log("the value was flipped to false");
+            }
+        };
+        getData();
+    });
+
+    //Toggles the isEditing variable.
+    app.get("/toggleEditing/:value", function(req, res){
+        const getData = async () => {
+            if(req.params.value =="true") {
+                isEditing = true;
+            }
+            else if(req.params.value == "false") {
+                isEditing = false;
+            }
+        };
+        getData();
+    });
+
+    //Returns the value of the isEditing variable
+    app.get("/getEditValue", function(req, res){
+        const getData = async () => {
+            res.send(JSON.stringify(isEditing));
         };
         getData();
     });
