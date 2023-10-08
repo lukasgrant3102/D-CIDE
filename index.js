@@ -201,18 +201,16 @@ fetch('https://api.ipify.org?format=json')
     });
 
     //Toggles the isSharing variable.
-    app.get("/toggleSharing/:value", function(req, res){
+    app.post("/setShareValue", function(req, res){
         const getData = async () => {
-            console.log("The toggle value was: " + req.params.value);
 
-            if(req.params.value == "true") {
-                isSharing = true;
-                console.log("The value was flipped to true");
-            }
-            else if(req.params.value == "false") {
-                isSharing = false;
-                console.log("the value was flipped to false");
-            }
+            const newValue = req.body.value;
+            console.log("setShareValue body: " + newValue);
+            isSharing = newValue;
+
+            // Send a response with the updated user_texts
+            res.json(newValue);
+
         };
         getData();
     });

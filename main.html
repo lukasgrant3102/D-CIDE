@@ -332,7 +332,20 @@
                     //console.log("you are no longer host.");
                     //console.log(isHost);
                 //}
-                fetch('http://' + site_ip + ':' + port + '/toggleSharing/true');
+                fetch('http://' + site_ip + ':' + port + '/setShareValue', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ value: true }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Updated user:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error updating shareValue:', error);
+                    });
 
                 setUsername();
 
@@ -383,16 +396,37 @@
                     preToggle = data;
                     
                     if(isSharing) {
-                        fetch('http://' + site_ip + ':' + port + '/toggleSharing/false').catch(error => {
-                            console.error('/toggleSharing/false request failed: ', error);
-                        });;
+                        fetch('http://' + site_ip + ':' + port + '/setShareValue', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ value: false }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Updated user:', data);
+                        })
+                        .catch(error => {
+                            console.error('Error turing sharing off:', error);
+                        });
                         console.log("Sharing should stop");
-                        }
+                    }
                     else if(!isSharing) {
-                        console.log("It is making it into the else if statement");
-                        fetch('http://' + site_ip + ':' + port + '/toggleSharing/true').catch(error => {
-                            console.error('/toggleSharing/true request failed: ', error);
-                        });  
+                        fetch('http://' + site_ip + ':' + port + '/setShareValue', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ value: true }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Updated user:', data);
+                        })
+                        .catch(error => {
+                            console.error('Error turning share on:', error);
+                        });
                     }
 
                 }).catch(error => {
