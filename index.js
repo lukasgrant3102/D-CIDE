@@ -109,6 +109,19 @@ fetch('https://api.ipify.org?format=json')
         
     });
 
+    // POST handler to update a specific user_text variable based on id
+    app.post("/userUpdate/:user_id", function(req, res){
+        const newText = req.body.text;
+        const id = req.params.user_id;
+
+        // Update the user_texts variable with the deviceID as the key
+        user_texts[id] = newText;
+
+        // Send a response with the updated user_texts
+        res.json(newText);
+        
+    });
+
     // POST handler to update the name_id_pair variable with a new pair
     app.post("/setUsername", function(req, res){
         const username = req.body;
@@ -127,7 +140,7 @@ fetch('https://api.ipify.org?format=json')
     });
     
 
-    //GET handler test
+    //GET all user texts
     app.get("/getUserText", function(req, res){
         const getData = async () => {
             res.send(JSON.stringify(user_texts));
@@ -135,6 +148,16 @@ fetch('https://api.ipify.org?format=json')
         };
         getData();
     });
+
+    //GET a specific user text based on id
+    app.get("/getUserText/:user_id", function(req, res){
+        const getData = async () => {
+            res.send(JSON.stringify(user_texts[req.params.user_id]));
+        };
+        getData();
+    });
+
+
 
     //GET handler test
     app.get("/getNamePairs", function(req, res){
