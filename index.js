@@ -215,15 +215,17 @@ fetch('https://api.ipify.org?format=json')
         getData();
     });
 
-    //Toggles the isEditing variable.
-    app.get("/toggleEditing/:value", function(req, res){
+    //Toggles the isSharing variable.
+    app.post("/setEditValue", function(req, res){
         const getData = async () => {
-            if(req.params.value =="true") {
-                isEditing = true;
-            }
-            else if(req.params.value == "false") {
-                isEditing = false;
-            }
+
+            const newValue = req.body.value;
+            console.log("setEditValue body: " + newValue);
+            isEditing = newValue;
+
+            // Send a response with the updated user_texts
+            res.json(newValue);
+
         };
         getData();
     });
