@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "bp": "^0.1.1-beta",
+    "codemirror": "^6.0.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "express": "^4.18.2",

@@ -47,13 +47,15 @@ textarea:focus
     justify-content: center;
     align-content: flex-start;
     overflow-y: auto;
+    position: relative;
 }
 
 .screen-container{
     width: 40%;
     height: 12%;
     margin: 10px;
-    margin-bottom: 35px;
+    margin-top: 32px;
+    margin-bottom: 15px;
 }
 
 .mini-screen {
@@ -146,7 +148,7 @@ textarea:focus
 
     width: 12%;
     height: 5%;
-    margin-left: 20px;
+    margin-left: 27px;
     margin-top: 5px;
 
     border-radius: 30px;
@@ -161,4 +163,12 @@ textarea:focus
     margin-left: auto;
     margin-right: auto;
     text-align: center;
+}
+
+#return_to_host_view_button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 5px;
 }

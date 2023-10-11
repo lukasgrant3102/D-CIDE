@@ -2,7 +2,6 @@
 <html>
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-        <script src="inputChange.js"></script>
         <link rel="stylesheet" href="./styles/styles.css">
         <meta http-equiv="Cache-control" content="no-cache">
     </head>
@@ -31,7 +30,7 @@
 
 
 
-        <script>
+        <script>            
             let isHost = false;
 
             let storedText = "";
@@ -307,7 +306,7 @@
                                 console.log("request failed");
                                 console.log(error)
                             });
-                        }, 500);
+                        }, 2500);
                     }).catch(error => {
                         console.error('Error getting ip: ', error);
                     });;
@@ -359,7 +358,11 @@
                     console.log("this is the username: " + usernameInput);
 
                     let main = document.getElementById("main");
-                    main.innerHTML = "<textarea rows='20' columns='800' id='user_input_area'></textarea>";
+                    main.innerHTML = "";
+                    if(!isHost){
+                        main.innerHTML = "<div id='screen-title'>" + usernameInput + "</div>" + main.innerHTML;
+                    }
+                    main.innerHTML += "<textarea rows='20' columns='800' id='user_input_area'></textarea>";
 
                 
                     fetch('http://' + site_ip + ':' + port + '/setUsername', {
@@ -474,7 +477,9 @@
                             console.log(containerId);
 
                             let screen_title = document.getElementById("screen-title");
-                            screen_title.innerText = screenContainer.getElementById("screen-name").innerText + "'s Screen";
+                            console.log(screenContainer);
+                            console.log(screenContainer.querySelector(".screen-name"));
+                            screen_title.innerText = screenContainer.querySelector(".screen-name").innerText + "'s Screen";
 
                             //Set the 'sharing id' to the container that was clicked on.
                             //Should be changed to a post request.
