@@ -347,6 +347,7 @@
                 setUsername();
 
                 let main = document.getElementById("main");
+                main.innerHTML = "<div id='screen-title'>Host View</div>" + main.innerHTML;
                 main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";                
             }
 
@@ -472,7 +473,11 @@
                             var containerId = containerIdString.substring("screen-container-".length);
                             console.log(containerId);
 
+                            let screen_title = document.getElementById("screen-title");
+                            screen_title.innerText = screenContainer.getElementById("screen-name").innerText + "'s Screen";
+
                             //Set the 'sharing id' to the container that was clicked on.
+                            //Should be changed to a post request.
                             fetch('http://' + site_ip + ':' + port + '/setSharingID/'+containerId).then(response => response.json()).then(data => {
                                 console.log("new sharing id set to: " + containerId);
                             }).catch(error => {
@@ -497,6 +502,8 @@
             function returnToHostView() {
                 let main_input = document.getElementById("user_input_area");
                 main_input.value = storedText;
+                let screen_title = document.getElementById("screen-title");
+                screen_title.textContent = "Host View";
 
                 side.innerHTML = side.innerHTML.substring("<button onclick='returnToHostView()' id='return_to_host_view_button'>Return to Host View</button>".length);
                 isStudentScreen = false;
