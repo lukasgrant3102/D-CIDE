@@ -2,6 +2,7 @@
 const express = require('express');
 const fs = require('fs');
 const app = express(); 
+const { exec } = require('child_process');
 //let ip = "216.249.148.174";
 //let ip = "10.200.45.49";
 let PORT = 8080; 
@@ -26,6 +27,7 @@ let isEditing = false;
 
 let soloText = "";
 let currentSharingID = "";
+let file_count = 0;
 
 //Must have the user ip to run the program.
 fetch('https://api.ipify.org?format=json')
@@ -247,9 +249,62 @@ fetch('https://api.ipify.org?format=json')
     });
 
 
+    //Run code - In progress
+    app.post('/execute-java', (req, res) => {
+        // Receive Java code from the POST request
+        const javaCode = req.body.code;
+        const cleanedString = javaCode.replace(/\\/g, '').replace(/\n/g, '');
 
-    let ip = "10.200.45.183"
-    //let ip = "216.249.148.174"
+        const newCode = "public class class_" + file_count + "{\n" + javaCode + "\n}";
+
+      
+        // Write the Java code to a temporary file
+        fs.writeFile('JavaFiles/class_' + file_count + '.java', newCode, (writeError) => {
+          if (writeError) {
+            res.status(500).json({ error: 'Error writing Java code to file' });
+            return;
+          }
+          file_count += 1;
+          
+          // Compile the Java source code into a class
+            exec('javac JavaFiles/class_' + file_count + '.java', (compileError) => {
+                if (compileError) {
+                    res.status(500).json({ error: newCode });
+                    return;
+                }
+            });
+            
+                // Execute the compiled Java class
+                exec('java JavaFiles/class_' + file_count, (executionError, stdout, stderr) => {
+                    if (executionError) {
+                        res.status(500).json({ error: 'Error executing Java code' });
+                    } else {
+                        // Capture the output of the executed code
+                        res.json({ output: stdout });
+                    }
+        
+                    /*
+                    // Clean up: Remove the temporary files
+                    fs.unlink('JavaFiles/class_' + file_count + '.java', (unlinkError) => {
+                        if (unlinkError) {
+                            console.error('Error deleting temporary Java file');
+                        }
+                    });
+                    fs.unlink('JavaFiles/class_' + file_count + '.class', (unlinkError) => {
+                        if (unlinkError) {
+                            console.error('Error deleting temporary class file');
+                        }
+                    });
+                });
+                */
+            });
+        }); 
+    });
+
+
+
+    //let ip = "10.200.45.183"
+    let ip = "216.249.148.174"
     //Listen for requests at the specified port
     http.listen(PORT, ip, function () {
         console.log('Running at ' + ip + ":" + PORT); 

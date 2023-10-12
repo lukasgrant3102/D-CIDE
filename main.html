@@ -347,7 +347,9 @@
 
                 let main = document.getElementById("main");
                 main.innerHTML = "<div id='screen-title'>Host View</div>" + main.innerHTML;
-                main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";                
+                main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";      
+
+                main.innerHTML += "<button onclick='submitCode()' id='submit-code-button'>Submit</button>";              
             }
 
             function setUsername() {
@@ -526,6 +528,31 @@
                     .catch(error => {
                         console.error('Error updating edit value to false:', error);
                     });
+            }
+
+
+            //Submits the code to the server for running.
+            function submitCode() {
+                let textArea = document.getElementById("user_input_area");
+                console.log(textArea.value);
+                fetch('http://' + site_ip + ':' + port + '/getUserId').then(response => response.json()).then(data => {
+                    let user_id = data;
+
+                    fetch('http://' + site_ip + ':' + port + '/execute-java', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ code: textArea.value }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Response from execute-code: ', data);
+                        })
+                        .catch(error => {
+                            console.error('Error updating edit value to false:', error);
+                        });
+                });
             }
 
         </script>
