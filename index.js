@@ -21,6 +21,7 @@ let currentText = {
 //This is the variable that controls all user text.
 
 let user_texts = {};
+let user_console_texts = {};
 let name_id_pairs = {};
 let isSharing = true;
 let isEditing = false;
@@ -251,39 +252,41 @@ fetch('https://api.ipify.org?format=json')
 
     //Run code - In progress
     app.post('/execute-java', (req, res) => {
+        file_count += 1;
         // Receive Java code from the POST request
         const javaCode = req.body.code;
-        const cleanedString = javaCode.replace(/\\/g, '').replace(/\n/g, '');
-
         const newCode = "public class class_" + file_count + "{\n" + javaCode + "\n}";
+
+        let deviceID = req.cookies.deviceID || generateUniqueID();
 
       
         // Write the Java code to a temporary file
         fs.writeFile('JavaFiles/class_' + file_count + '.java', newCode, (writeError) => {
           if (writeError) {
+            user_console_texts[deviceID] = writeError;
             res.status(500).json({ error: 'Error writing Java code to file' });
             return;
           }
-          file_count += 1;
+          
           
           // Compile the Java source code into a class
             exec('javac JavaFiles/class_' + file_count + '.java', (compileError) => {
                 if (compileError) {
-                    res.status(500).json({ error: newCode });
+                    user_console_texts[deviceID] = compileError;
+                    res.status(500).json({ error: "Error compiling code: \n" + newCode });
                     return;
                 }
-            });
             
                 // Execute the compiled Java class
-                exec('java JavaFiles/class_' + file_count, (executionError, stdout, stderr) => {
+                exec('java -cp JavaFiles class_' + file_count, (executionError, stdout, stderr) => {
                     if (executionError) {
-                        res.status(500).json({ error: 'Error executing Java code' });
+                        res.status(500).json({ error: 'Error executing Java code: \n' + executionError });
                     } else {
                         // Capture the output of the executed code
+                        user_console_texts[deviceID] = stdout;
                         res.json({ output: stdout });
                     }
-        
-                    /*
+                    
                     // Clean up: Remove the temporary files
                     fs.unlink('JavaFiles/class_' + file_count + '.java', (unlinkError) => {
                         if (unlinkError) {
@@ -294,11 +297,20 @@ fetch('https://api.ipify.org?format=json')
                         if (unlinkError) {
                             console.error('Error deleting temporary class file');
                         }
-                    });
+                    }); 
                 });
-                */
             });
         }); 
+    });
+
+    //Gets the text for the console for each user
+    app.get("/getConsoleOutput", function(req, res){
+        let deviceID = req.cookies.deviceID || generateUniqueID();
+
+        const getData = async () => {
+            res.send(JSON.stringify(user_console_texts[deviceID]));
+        };
+        getData();
     });
 
 

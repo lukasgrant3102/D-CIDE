@@ -11,20 +11,18 @@
                 This is going to be the top panel.
             </div>
                 <div id="content">
-                <div id="main">
+                    <div id="main">
 
-                    <input type="text" placeholder="Enter name here" id="username" name="username">
-                    <button onclick='setUsername()' id="join_button">Join</button>
-                    <button onclick='setHost()' id='host_button'>Join as Host</button>
+                        <input type="text" placeholder="Enter name here" id="username" name="username">
+                        <button onclick='setUsername()' id="join_button">Join</button>
+                        <button onclick='setHost()' id='host_button'>Join as Host</button>
 
-                    
-                    
+                        
+                        
 
-                </div>
+                    </div>
 
                 <!--This is where the mini views of the student screens will go-->
-                <div id="side">   
-                </div>
             </div>
         </div>
 
@@ -85,6 +83,14 @@
                     
                         const textUpdateInterval = setInterval(() => {
                             console.log("loop");
+
+                            let console_area = document.getElementById("console_area");
+                            if(console_area) {
+                                fetch('http://' + site_ip + ':' + port + '/getConsoleOutput').then(response => response.json()).then(data => {
+                                    let output = data;
+                                    console_area.value = output;
+                                });
+                            }
 
                             fetch('http://' + site_ip + ':' + port + '/getShareStatus').then(response => response.json()).then(data => {
                                 let isSharing = data;
@@ -346,6 +352,12 @@
                 setUsername();
 
                 let main = document.getElementById("main");
+                let content = document.getElementById("content");
+
+                main.style.width = "75%";
+                content.innerHTML += "<div id='side'></div>";
+
+                main = document.getElementById("main");
                 main.innerHTML = "<div id='screen-title'>Host View</div>" + main.innerHTML;
                 main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";      
 
@@ -365,6 +377,7 @@
                         main.innerHTML = "<div id='screen-title'>" + usernameInput + "</div>" + main.innerHTML;
                     }
                     main.innerHTML += "<textarea rows='20' columns='800' id='user_input_area'></textarea>";
+                    main.innerHTML += "<textarea readonly rows='20' columns='800' id='console_area'></textarea>";
 
                 
                     fetch('http://' + site_ip + ':' + port + '/setUsername', {
