@@ -359,9 +359,7 @@
 
                 main = document.getElementById("main");
                 main.innerHTML = "<div id='screen-title'>Host View</div>" + main.innerHTML;
-                main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";      
-
-                main.innerHTML += "<button onclick='submitCode()' id='submit-code-button'>Submit</button>";              
+                main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";                 
             }
 
             function setUsername() {
@@ -378,6 +376,7 @@
                     }
                     main.innerHTML += "<textarea rows='20' columns='800' id='user_input_area'></textarea>";
                     main.innerHTML += "<textarea readonly rows='20' columns='800' id='console_area'></textarea>";
+                    main.innerHTML += "<button onclick='submitCode()' id='submit-code-button'>Submit</button>";   
 
                 
                     fetch('http://' + site_ip + ':' + port + '/setUsername', {

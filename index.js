@@ -272,7 +272,7 @@ fetch('https://api.ipify.org?format=json')
           // Compile the Java source code into a class
             exec('javac JavaFiles/class_' + file_count + '.java', (compileError) => {
                 if (compileError) {
-                    user_console_texts[deviceID] = compileError;
+                    user_console_texts[deviceID] = "Error compiling code";
                     res.status(500).json({ error: "Error compiling code: \n" + newCode });
                     return;
                 }
@@ -280,10 +280,12 @@ fetch('https://api.ipify.org?format=json')
                 // Execute the compiled Java class
                 exec('java -cp JavaFiles class_' + file_count, (executionError, stdout, stderr) => {
                     if (executionError) {
+                        user_console_texts[deviceID] = stderr;
                         res.status(500).json({ error: 'Error executing Java code: \n' + executionError });
                     } else {
                         // Capture the output of the executed code
                         user_console_texts[deviceID] = stdout;
+                        console.log(stdout);
                         res.json({ output: stdout });
                     }
                     
