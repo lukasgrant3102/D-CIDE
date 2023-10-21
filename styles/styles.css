@@ -27,7 +27,7 @@ textarea:focus
 
 #content {
     display: flex;
-    height: 92%;
+    height: 100%;
     width: 100%; /* Ensure content div takes the full width */
 }
 
@@ -73,8 +73,25 @@ textarea:focus
     border: 2px solid yellow;
 }
 
+.screen-details {
+    display: flex;
+    width: 100%;
+    min-width: 100%;
+}
+
 .screen-name {
     margin-left: 8px;
+    width: 80%;
+}
+
+.status_circle {
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    background-color: yellow;
+
+    margin-top: 6px;
+    margin-left: 5px;
 }
 
 #user_input_area {
@@ -163,8 +180,37 @@ textarea:focus
 
     width: 12%;
     height: 5%;
-    margin-left: 27px;
+    margin-left: 3%;
     margin-top: -41px;
+
+    border-radius: 30px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+}
+#reset_status_button {
+    display: block;
+    background-color: rgb(255, 255, 0);
+
+    width: 12%;
+    height: 5%;
+    margin-left: 17%;
+    margin-top: -48px;
+
+    border-radius: 30px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#privacy_toggle_button {
+    display: block;
+    background-color: rgb(255, 67, 67);
+
+    width: 12%;
+    height: 5%;
+    margin-left: 31%;
+    margin-top: -50px;
 
     border-radius: 30px;
     text-align: center;
@@ -179,7 +225,7 @@ textarea:focus
     width: 12%;
     height: 5%;
     margin-left: auto;
-    margin-right: 27px;
+    margin-right: 3%;
 
     border-radius: 30px;
     text-align: center;
@@ -202,3 +248,4 @@ textarea:focus
     width: 100%;
     padding: 5px;
 }
+

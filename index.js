@@ -23,6 +23,7 @@ let currentText = {
 let user_texts = {};
 let user_console_texts = {};
 let name_id_pairs = {};
+let status_id_pairs = {};
 let isSharing = true;
 let isEditing = false;
 
@@ -140,11 +141,10 @@ fetch('https://api.ipify.org?format=json')
     });
 
     //Sets the current sharing id on the server
-    app.get("/setSharingID/:new_id", function(req, res){
-        const getData = async () => {
-            currentSharingID = req.params.new_id;
-        };
-        getData();
+    app.post("/setSharingID", function(req, res){
+        const new_id = req.body.id;
+        currentSharingID = new_id;
+        res.json(new_id);
     });
 
     //Retrieves the current sharing id from the server
@@ -167,6 +167,7 @@ fetch('https://api.ipify.org?format=json')
 
         // Update the user_texts variable with the deviceID as the key
         name_id_pairs[deviceID] = username.username;
+        status_id_pairs[deviceID] = "yellow";
 
         // Send a response with the updated user_texts
         res.json(user_texts[deviceID]);
@@ -192,16 +193,34 @@ fetch('https://api.ipify.org?format=json')
         getData();
     });
 
-
-
-    //GET handler test
+    //GET the list of name-id pairs
     app.get("/getNamePairs", function(req, res){
         const getData = async () => {
             res.send(JSON.stringify(name_id_pairs));
-            //console.log(user_texts);
         };
         getData();
     });
+
+
+    //GET the list of status-id pairs
+    app.get("/getStatusPairs", function(req, res){
+        const getData = async () => {
+            res.send(JSON.stringify(status_id_pairs));
+        };
+        getData();
+    });
+
+    //GET the list of status-id pairs
+    app.get("/resetStatus", function(req, res){
+        const getData = async () => {
+            for(var id in status_id_pairs) {
+                status_id_pairs[id] = "yellow";
+            }
+        };
+        getData();
+    });
+
+    
 
     //Toggles the isSharing variable.
     app.post("/setShareValue", function(req, res){
@@ -272,6 +291,7 @@ fetch('https://api.ipify.org?format=json')
           // Compile the Java source code into a class
             exec('javac JavaFiles/class_' + file_count + '.java', (compileError) => {
                 if (compileError) {
+                    status_id_pairs[deviceID] = "red";
                     user_console_texts[deviceID] = "Error compiling code";
                     res.status(500).json({ error: "Error compiling code: \n" + newCode });
                     return;
@@ -280,10 +300,12 @@ fetch('https://api.ipify.org?format=json')
                 // Execute the compiled Java class
                 exec('java -cp JavaFiles class_' + file_count, (executionError, stdout, stderr) => {
                     if (executionError) {
+                        status_id_pairs[deviceID] = "red";
                         user_console_texts[deviceID] = stderr;
                         res.status(500).json({ error: 'Error executing Java code: \n' + executionError });
                     } else {
                         // Capture the output of the executed code
+                        status_id_pairs[deviceID] = "green";
                         user_console_texts[deviceID] = stdout;
                         console.log(stdout);
                         res.json({ output: stdout });

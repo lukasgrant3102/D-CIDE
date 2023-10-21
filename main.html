@@ -7,20 +7,17 @@
     </head>
     <body>
         <div id="container">
-            <div id="top">
-                This is going to be the top panel.
-            </div>
-                <div id="content">
-                    <div id="main">
+            <div id="content">
+                <div id="main">
 
-                        <input type="text" placeholder="Enter name here" id="username" name="username">
-                        <button onclick='setUsername()' id="join_button">Join</button>
-                        <button onclick='setHost()' id='host_button'>Join as Host</button>
+                    <input type="text" placeholder="Enter name here" id="username" name="username">
+                    <button onclick='setUsername()' id="join_button">Join</button>
+                    <button onclick='setHost()' id='host_button'>Join as Host</button>
 
-                        
-                        
+                    
+                    
 
-                    </div>
+                </div>
 
                 <!--This is where the mini views of the student screens will go-->
             </div>
@@ -263,40 +260,47 @@
                                                 fetch('http://' + site_ip + ':' + port + '/getNamePairs').then(response => response.json()).then(pairs => {
                                                     let name_pairs = pairs;
 
-
+                                                    fetch('http://' + site_ip + ':' + port + '/getStatusPairs').then(response => response.json()).then(sPairs => {
+                                                        console.log(sPairs);
+                                                        let status_pairs = sPairs;
                                                     
-                                                    fetch('http://' + site_ip + ':' + port + '/getUserId').then(response => response.json()).then(id => {
-                                                        let host_id = id;
-                                                        console.log("host id: " + host_id);
-                                                    
+                                                        fetch('http://' + site_ip + ':' + port + '/getUserId').then(response => response.json()).then(id => {
+                                                            let host_id = id;
+                                                            console.log("host id: " + host_id);
+                                                        
 
-                                                        //console.log(name_pairs);
-                                                        for(const user_id in user_texts) {
-                                                            let user_text = user_texts[user_id];
-                                                            let user_name = name_pairs[user_id];
-                                                            console.log(`User ID: ${user_id}, Name: ${user_name}, Text: ${user_text}`);
+                                                            //console.log(name_pairs);
+                                                            for(const user_id in user_texts) {
+                                                                let user_text = user_texts[user_id];
+                                                                let user_name = name_pairs[user_id];
+                                                                let user_status = status_pairs[user_id];
+                                                                console.log(`User ID: ${user_id}, Name: ${user_name}, Text: ${user_text}`);
 
-                                                            //Only attempt to display a screen if the name has been selected by the user.
-                                                            if(user_name){
-                                                                //Create mini screens for all except host.
-                                                                if(!(user_id==host_id)){
-                                                                    let side = document.getElementById('side');
-                                                                    let tryScreen = document.getElementById('screen-container-' + user_id);
-                                                                    if(!tryScreen) {
+                                                                //Only attempt to display a screen if the name has been selected by the user.
+                                                                if(user_name){
+                                                                    //Create mini screens for all except host.
+                                                                    if(!(user_id==host_id)){
+                                                                        let side = document.getElementById('side');
+                                                                        let tryScreen = document.getElementById('screen-container-' + user_id);
+                                                                        if(!tryScreen) {
 
-                                                                        side.innerHTML += "<div class='screen-container' id='screen-container-" + user_id +"'> <div class='mini-screen' onclick='getScreenData(this)'></div><div class='screen-name'>" + user_name + "</div> </div>"   
+                                                                            side.innerHTML += "<div class='screen-container' id='screen-container-" + user_id + "'> <div class='mini-screen' onclick='getScreenData(this)'></div><div class='screen-details'><div class='screen-name'>" + user_name + "</div> <div class='status_circle'></div></div>"   
 
-                                                                    }
-                                                                    else {
-                                                                        tryScreen.children[0].innerHTML = user_text;
-                                                                        tryScreen.children[1].innerHTML = user_name;
+                                                                        }
+                                                                        else {
+                                                                            tryScreen.children[0].innerHTML = user_text;
+                                                                            tryScreen.children[1].children[0].innerHTML = user_name;
+                                                                            tryScreen.children[1].children[1].style.backgroundColor = user_status;
+                                                                        }
                                                                     }
                                                                 }
                                                             }
-                                                        }
+                                                        }).catch(error => {
+                                                            console.error('/getUserId request failed: ', error);
+                                                        });;   
                                                     }).catch(error => {
-                                                        console.error('/getUserId request failed: ', error);
-                                                    });;                                       
+                                                    console.error('/getStatusPairs request failed: ', error);
+                                                    });;;                                    
                                                 }).catch(error => {
                                                     console.error('/getNamePairs request failed: ', error);
                                                 });;
@@ -359,7 +363,9 @@
 
                 main = document.getElementById("main");
                 main.innerHTML = "<div id='screen-title'>Host View</div>" + main.innerHTML;
-                main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";                 
+                main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";  
+                main.innerHTML += "<button onclick='resetStatus()' id='reset_status_button'>Reset Statuses</button>";  
+                main.innerHTML += "<button onclick='privacyToggle()' id='privacy_toggle_button'>Privacy: Off</button>"        
             }
 
             function setUsername() {
@@ -497,11 +503,28 @@
 
                             //Set the 'sharing id' to the container that was clicked on.
                             //Should be changed to a post request.
+                            /*
                             fetch('http://' + site_ip + ':' + port + '/setSharingID/'+containerId).then(response => response.json()).then(data => {
                                 console.log("new sharing id set to: " + containerId);
                             }).catch(error => {
                                 console.error('/setSharingID/containerId request failed: ', error);
                             });;
+                            */
+
+                            fetch('http://' + site_ip + ':' + port + '/setSharingID', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({id: containerId}),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Updated user:', data);
+                            })
+                            .catch(error => {
+                                console.error('/setSharingID request failed: ', error);
+                            });
 
                             let main_input = document.getElementById("user_input_area");
 
@@ -565,6 +588,39 @@
                             console.error('Error updating edit value to false:', error);
                         });
                 });
+            }
+
+            //Attempts to reset the status of all users.
+            function resetStatus() {
+                fetch('http://' + site_ip + ':' + port + '/resetStatus').catch(error => {console.error("Error resetting statuses");});
+            }
+
+            //Toggles visibility of privacy mode
+            function privacyToggle() {
+                let side = document.getElementById("side");
+                let main = document.getElementById("main");
+                let screen_title = document.getElementById("screen-title");
+                let user_input_area = document.getElementById("user_input_area");
+                let privacy_toggle_button = document.getElementById("privacy_toggle_button");
+
+                if(side.style.display == "none") {
+                    privacy_toggle_button.innerHTML = "Privacy: Off";
+                    privacy_toggle_button.style.backgroundColor = "rgb(255, 67, 67)";
+                    privacy_toggle_button.marginTop = "-31px";
+                    user_input_area.style.marginTop = "0px"
+                    side.style.display = "flex";
+                    main.style.width = "75%";
+                    screen_title.style.display = "block";
+                }
+                else {
+                    privacy_toggle_button.innerHTML = "Privacy: On";
+                    privacy_toggle_button.style.backgroundColor = "rgb(0, 255, 38)";
+                    privacy_toggle_button.marginTop = "5px";
+                    user_input_area.style.marginTop = "34px";
+                    side.style.display = "none";
+                    main.style.width = "100%";
+                    screen_title.style.display = "none";
+                }
             }
 
         </script>
