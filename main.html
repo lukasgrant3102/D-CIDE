@@ -3,6 +3,11 @@
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
         <link rel="stylesheet" href="./styles/styles.css">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/mode/clike/clike.min.js"></script>     
+
         <meta http-equiv="Cache-control" content="no-cache">
     </head>
     <body>
@@ -13,9 +18,6 @@
                     <input type="text" placeholder="Enter name here" id="username" name="username">
                     <button onclick='setUsername()' id="join_button">Join</button>
                     <button onclick='setHost()' id='host_button'>Join as Host</button>
-
-                    
-                    
 
                 </div>
 
@@ -382,7 +384,7 @@
                     }
                     main.innerHTML += "<textarea rows='20' columns='800' id='user_input_area'></textarea>";
                     main.innerHTML += "<textarea readonly rows='20' columns='800' id='console_area'></textarea>";
-                    main.innerHTML += "<button onclick='submitCode()' id='submit-code-button'>Submit</button>";   
+                    main.innerHTML += "<button onclick='submitCode()' id='submit-code-button'>Submit</button>";  
 
                 
                     fetch('http://' + site_ip + ':' + port + '/setUsername', {
