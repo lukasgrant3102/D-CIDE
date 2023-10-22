@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="./styles/styles.css">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.28.2/min/vs/loader.js"></script>
+
+    
+</head>
+<body>
+    <div id="main">
+        <div id='editor'></div>
+    </div>
+</body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.28.2/min/vs' }});
+            require(['vs/editor/editor.main'], function () {
+                // Create the editor instance
+                var editor = monaco.editor.create(document.getElementById('editor'), {
+                    value: [
+                        'function helloWorld() {',
+                        '    console.log("Hello, world!");',
+                        '}',
+                    ].join('\n'),
+                    language: 'javascript', // Specify the language
+                    theme: 'vs-dark', // Specify the theme (e.g., 'vs', 'vs-dark', 'hc-black')
+                });
+            });
+    });
+</script>
+</html>
