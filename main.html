@@ -92,6 +92,7 @@
                             if(console_area) {
                                 fetch('http://' + site_ip + ':' + port + '/getConsoleOutput').then(response => response.json()).then(data => {
                                     let output = data;
+                                    console.log("output: " + output);
                                     console_area.value = output;
                                 });
                             }

@@ -110,7 +110,7 @@ fetch('https://api.ipify.org?format=json')
 
         //console.log("\nuser_texts: ")
         //console.log(user_texts);
-        console.log("isSharing: " + isSharing);
+        //console.log("isSharing: " + isSharing);
 
         //console.log("\nname_id_pairs: ")
         //console.log(name_id_pairs);
@@ -333,14 +333,16 @@ fetch('https://api.ipify.org?format=json')
 
         const getData = async () => {
             res.send(JSON.stringify(user_console_texts[deviceID]));
+            console.log(JSON.stringify(user_console_texts[deviceID]));
         };
         getData();
     });
 
 
 
-    //let ip = "10.200.45.183"
-    let ip = "216.249.148.174"
+    let ip = "10.200.45.176"
+    //let ip = "216.249.148.174"
+    //let ip = "172.26.88.82";
     //Listen for requests at the specified port
     http.listen(PORT, ip, function () {
         console.log('Running at ' + ip + ":" + PORT); 
