@@ -1,34 +1,654 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <link rel="stylesheet" href="./styles/styles.css">
-    <meta http-equiv="Cache-control" content="no-cache">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.28.2/min/vs/loader.js"></script>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <link rel="stylesheet" href="./styles/styles.css">
 
-    
-</head>
-<body>
-    <div id="main">
-        <div id='editor'></div>
-    </div>
-</body>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/mode/clike/clike.min.js"></script>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.28.2/min/vs' }});
-            require(['vs/editor/editor.main'], function () {
-                // Create the editor instance
-                var editor = monaco.editor.create(document.getElementById('editor'), {
-                    value: [
-                        'function helloWorld() {',
-                        '    console.log("Hello, world!");',
-                        '}',
-                    ].join('\n'),
-                    language: 'javascript', // Specify the language
-                    theme: 'vs-dark', // Specify the theme (e.g., 'vs', 'vs-dark', 'hc-black')
-                });
+        <meta http-equiv="Cache-control" content="no-cache">
+    </head>
+    <body>
+        <div id="container">
+            <div id="content">
+                <div id="main">
+
+                    <input type="text" placeholder="Enter name here" id="username" name="username">
+                    <button onclick='setUsername()' id="join_button">Join</button>
+                    <button onclick='setHost()' id='host_button'>Join as Host</button>
+
+                </div>
+
+                <!--This is where the mini views of the student screens will go-->
+            </div>
+        </div>
+
+
+
+        <script>            
+            let isHost = false;
+
+            let storedText = "";
+            let isStudentScreen = false;
+            let preToggle = null;
+
+            var editor = document.getElementById("editor");
+
+            //Grab the url of the site to determine where to send api requests.
+            const site_link = window.location.href;
+
+            const regex = /\/\/([^:/]+):(\d+)/;
+            const match = site_link.match(regex);
+            let site_ip = "unknown";
+            let port = 8080;
+
+            if (match) {
+                site_ip = match[1];
+                port = match[2];
+                
+                console.log("IP Address:", site_ip);
+                console.log("Port:", port);
+            }
+            else {
+                console.log("Could not extract the site ip.");
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+
+                var codeMirror;
+                
+                //Must have user IP before they can run the app
+                try {
+                    fetch('https://api.ipify.org?format=json')
+                    .then(response => response.json())
+                    .then(data => {
+
+                        //Start main app here.
+                        let user_ip = data.ip;
+                        console.log(user_ip);
+
+                        //Global variables
+                        let currentText;
+
+                        console.log("1")
+                        
+                        console.log("page loaded");
+
+                        //Creating the host button
+                        let mainDiv = document.getElementById("main");
+
+                        //let testdiv = document.getElementById("testdiv");
+
+                        //Begin loop for text control
+                        console.log("This is the start of the program");
+                    
+                        const textUpdateInterval = setInterval(() => {
+                            console.log("loop");
+
+                            let console_area = document.getElementById("console_area");
+                            if(console_area) {
+                                fetch('http://' + site_ip + ':' + port + '/getConsoleOutput').then(response => response.json()).then(data => {
+                                    let output = data;
+                                    console_area.value = output;
+                                });
+                            }
+
+                            fetch('http://' + site_ip + ':' + port + '/getShareStatus').then(response => response.json()).then(data => {
+                                let isSharing = data;
+                                console.log("It goes into the fetch");
+                                count = 0;
+
+                                fetch('http://' + site_ip + ':' + port + '/getEditValue').then(response => response.json()).then(data => {
+
+                                    let isEditing = data;                    
+
+                                    //If the user is not host then it just retrieves the current text data from the host
+                                    if(!isHost) {
+                                        console.log("is not host");
+
+                                        //Create the inner html for the user
+
+                                        let input = document.getElementById("user_input_area");
+                                        //If the user has set their name, then the rest of the code will run.
+                                        if(input) {
+
+                                            //Only duplicate onto student screens if host is sharing
+                                            if(isSharing) {
+                                                //Retrieve what the host has typed
+                                                fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
+                                                    input.value = data.text;
+                                                }).catch(error => {
+                                                    console.error('/retrieve request failed: ', error);
+                                                });;
+                                            }
+
+                                            if(!isEditing){
+                                                //Create the data pair
+                                                const userText = input.value; // Replace with your new text
+                                                
+                                                // Send a POST request to the server to update the user_texts variable
+                                                fetch('http://' + site_ip + ':' + port + '/userUpdate', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({text: userText}),
+                                                    //body: JSON.stringify({ "test here": "test there" }),
+                                                })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    console.log('Updated user_texts with:', data);
+                                                })
+                                                .catch(error => {
+                                                    console.log('Error updating user_texts:', error);
+                                                });
+                                            }
+                                            else {
+                                                let main_input = document.getElementById("user_input_area");
+                                                console.log("made it into editing part");
+
+                                                //If the user's id matched the current one, then their screen gets updated
+                                                fetch('http://' + site_ip + ':' + port + '/getUserId').then(response => response.json()).then(data => {
+                                                    let user_id = data;
+                                                    fetch('http://' + site_ip + ':' + port + '/getSharingID').then(response => response.json()).then(data => {
+                                                        let sharingID = data;
+                                                        
+                                                        console.log("user_id: " + user_id);
+                                                        console.log("sharingID: " + sharingID);
+                                                        if(user_id == sharingID) {
+                                                            fetch('http://' + site_ip + ':' + port + '/userUpdate/retrieve').then(response => response.json()).then(data => {
+                                                                let newText = data;
+                                                                main_input.value = newText;
+                                                            }).catch(error => {
+                                                                console.error('/userUpdate/retrieve request failed: ', error);
+                                                            });;
+                                                        }
+                                                    }).catch(error => {
+                                                        console.error('/getSharingId request failed: ', error);
+                                                    });;
+                                                }).catch(error => {
+                                                    console.error('/getUserId request failed: ', error);
+                                                });;
+                                            }
+                                        }   
+                                    }
+                                    //If the user is the host then it uploads the data in the text box continuously so any non-host user can grab it
+                                    else {
+                                        console.log("is host");
+                                        let input = document.getElementById("user_input_area");
+                                        //Only try to share if the host is off the username set screen
+                                        if(input) {
+                                            let shareButton = document.getElementById("share_button");
+                                            //Determine the button text and color based on the value of isSharing
+                                            if(isSharing != preToggle && !isEditing) {
+                                                shareButton.disabled = false;
+                                                if(isSharing) {
+                                                    shareButton.style.backgroundColor = "rgb(0, 255, 38)";
+                                                    shareButton.textContent = "Sharing: On";
+                                                    console.log("Sharing is on");
+                                                }
+                                                else if(!isSharing) {
+                                                    shareButton.style.backgroundColor = "rgb(255, 67, 67)";
+                                                    shareButton.textContent = "Sharing: Off";
+                                                    console.log("Sharing is off");
+                                                }
+                                            }
+                                            //Disable the button if the host is editing
+                                            if(isEditing) {
+                                                shareButton.style.backgroundColor = "gray";
+                                                shareButton.textContent = "Editing";
+                                                shareButton.disabled = true;
+                                            }
+                                    
+                                            //Only share if the host has the program set to do so
+                                            if(isSharing) {
+                                                //This section takes care of sharing the text with all connected users.
+                                                console.log("input detected");
+                                            
+                                                const newText = input.value;
+                                
+                                                // Send a POST request to the server to update currentText
+                                                fetch('http://' + site_ip + ':' + port + '/update', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({ text: newText }),
+                                                })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    console.log('Updated currentText:', data);
+                                                })
+                                                .catch(error => {
+                                                    console.error('Error updating currentText:', error);
+                                                });
+                                            }
+
+                                            if(isEditing) {
+                                                let main_input = document.getElementById("user_input_area");
+                                                console.log("this should be the main input");
+                                                console.log(main_input);
+                                                let new_text = "";
+
+                                                if(main_input.text != "") {
+                                                    new_text = main_input.value;
+                                                }
+                                                else {
+                                                    new_text = " ";
+                                                }
+
+                                                console.log("New text is set to: " + new_text);
+
+                                                fetch('http://' + site_ip + ':' + port + '/userUpdate/send', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({text: new_text}),
+                                                    })
+                                                    .then(response => response.json())
+                                                    .then(data => {
+                                                        console.log('Updated text:', data);
+                                                    })
+                                                    .catch(error => {
+                                                        console.error('Error sending edit text to server:', error);
+                                                    });
+                                                
+                                            }
+
+
+                                            //This section takes care of creating the mini screens in the side panel for the host
+                                            fetch('http://' + site_ip + ':' + port + '/getUserText').then(response => response.json()).then(data => {
+                                                console.log(data);
+                                                let user_texts = data;
+                                                fetch('http://' + site_ip + ':' + port + '/getNamePairs').then(response => response.json()).then(pairs => {
+                                                    let name_pairs = pairs;
+
+                                                    fetch('http://' + site_ip + ':' + port + '/getStatusPairs').then(response => response.json()).then(sPairs => {
+                                                        console.log(sPairs);
+                                                        let status_pairs = sPairs;
+                                                    
+                                                        fetch('http://' + site_ip + ':' + port + '/getUserId').then(response => response.json()).then(id => {
+                                                            let host_id = id;
+                                                            console.log("host id: " + host_id);
+                                                        
+
+                                                            //console.log(name_pairs);
+                                                            for(const user_id in user_texts) {
+                                                                let user_text = user_texts[user_id];
+                                                                let user_name = name_pairs[user_id];
+                                                                let user_status = status_pairs[user_id];
+                                                                console.log(`User ID: ${user_id}, Name: ${user_name}, Text: ${user_text}`);
+
+                                                                //Only attempt to display a screen if the name has been selected by the user.
+                                                                if(user_name){
+                                                                    //Create mini screens for all except host.
+                                                                    if(!(user_id==host_id)){
+                                                                        let side = document.getElementById('side');
+                                                                        let tryScreen = document.getElementById('screen-container-' + user_id);
+                                                                        if(!tryScreen) {
+
+                                                                            side.innerHTML += "<div class='screen-container' id='screen-container-" + user_id + "'> <div class='mini-screen' onclick='getScreenData(this)'></div><div class='screen-details'><div class='screen-name'>" + user_name + "</div> <div class='status_circle'></div></div>"   
+
+                                                                        }
+                                                                        else {
+                                                                            tryScreen.children[0].innerHTML = user_text;
+                                                                            tryScreen.children[1].children[0].innerHTML = user_name;
+                                                                            tryScreen.children[1].children[1].style.backgroundColor = user_status;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }).catch(error => {
+                                                            console.error('/getUserId request failed: ', error);
+                                                        });;   
+                                                    }).catch(error => {
+                                                    console.error('/getStatusPairs request failed: ', error);
+                                                    });;;                                    
+                                                }).catch(error => {
+                                                    console.error('/getNamePairs request failed: ', error);
+                                                });;
+                                            }).catch(error => {
+                                                console.error('/getUserText request failed: ', error);
+                                            });;
+                                        }
+                                    }
+                                }).catch(error => {
+                                    console.error('/getEditValue request failed: ', error);
+                                });
+                            }).catch(function(error) {
+                                console.log("request failed");
+                                console.log(error)
+                            });
+                        }, 2500);
+                    }).catch(error => {
+                        console.error('Error getting ip: ', error);
+                    });;
+                    console.log('2');
+                
+                } catch (error) {
+                    console.error("Error fetching user IP");
+                }
             });
-    });
-</script>
+            //Toggles the host status of the user.
+            function setHost() {
+                if(!isHost) {
+                    isHost = true;
+                    console.log("you are now host.");
+                    console.log(isHost);
+                }
+                //else {
+                    //isHost = false;
+                    //console.log("you are no longer host.");
+                    //console.log(isHost);
+                //}
+                fetch('http://' + site_ip + ':' + port + '/setShareValue', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ value: true }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Updated user:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error updating shareValue:', error);
+                    });
+
+                setUsername();
+
+                let main = document.getElementById("main");
+                let content = document.getElementById("content");
+
+                main.style.width = "75%";
+                content.innerHTML += "<div id='side'></div>";
+
+                main = document.getElementById("main");
+                main.innerHTML = "<div id='screen-title'>Host View</div>" + main.innerHTML;
+                main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";  
+                main.innerHTML += "<button onclick='resetStatus()' id='reset_status_button'>Reset Statuses</button>";  
+                main.innerHTML += "<button onclick='privacyToggle()' id='privacy_toggle_button'>Privacy: Off</button>" 
+                
+                let editor = document.getElementById("editor");
+                codeMirror = CodeMirror.fromTextArea(editor, {
+                        mode: "text/x-java", // Specify the Java mode
+                        theme: "default",    // Choose a theme (e.g., "default")
+                        lineNumbers: true,   // Show line numbers
+                        autofocus: true,     // Auto-focus on the editor when the page loads
+                });
+                
+            }
+
+            function setUsername() {
+                let usernameInput = document.getElementById("username").value;
+
+                //Only let the user join if they have chosen a name
+                if(usernameInput.length > 0) {
+                    console.log("this is the username: " + usernameInput);
+
+                    let main = document.getElementById("main");
+                    main.innerHTML = "";
+                    if(!isHost){
+                        main.innerHTML = "<div id='screen-title'>" + usernameInput + "</div>" + main.innerHTML;
+                    }
+                    main.innerHTML += "<textarea id='editor'></textarea>";
+                    //main.innerHTML += "<textarea readonly rows='20' columns='800' id='console_area'></textarea>";
+                    main.innerHTML += "<button onclick='submitCode()' id='submit-code-button'>Submit</button>";  
+
+                    if(!isHost){
+                        let editor = document.getElementById("editor");
+                        codeMirror = CodeMirror.fromTextArea(editor, {
+                                mode: "text/x-java", // Specify the Java mode
+                                theme: "default",    // Choose a theme (e.g., "default")
+                                lineNumbers: true,   // Show line numbers
+                                autofocus: true,     // Auto-focus on the editor when the page loads
+                        });
+                    }
+       
+
+                
+                    fetch('http://' + site_ip + ':' + port + '/setUsername', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ "username": usernameInput }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Updated user:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error updating currentText:', error);
+                    });
+                }
+            }
+
+            //Lets the host toggle if they are sharing their text to all users
+            function toggleShare() {
+                let shareButton = document.getElementById('share_button');
+                //Get the current share status
+                fetch('http://' + site_ip + ':' + port + '/getShareStatus').then(response => response.json()).then(data => {
+                    let isSharing = data;
+                    console.log("The current value is: " + data);
+
+                    let shareButton = document.getElementById("share_button");
+                    shareButton.style.backgroundColor = "gray";
+                    shareButton.textContent = "Toggling";
+                    shareButton.disabled = true;
+                    preToggle = data;
+                    
+                    if(isSharing) {
+                        fetch('http://' + site_ip + ':' + port + '/setShareValue', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ value: false }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Updated user:', data);
+                        })
+                        .catch(error => {
+                            console.error('Error turing sharing off:', error);
+                        });
+                        console.log("Sharing should stop");
+                    }
+                    else if(!isSharing) {
+                        fetch('http://' + site_ip + ':' + port + '/setShareValue', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ value: true }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Updated user:', data);
+                        })
+                        .catch(error => {
+                            console.error('Error turning share on:', error);
+                        });
+                    }
+
+                }).catch(error => {
+                    console.error('/getShareStatus request failed: ', error);
+                });;
+            }
+
+            //Used to find the screen container id of the clicked mini-screen
+            function getScreenData(miniScreen) {
+                fetch('http://' + site_ip + ':' + port + '/getShareStatus').then(response => response.json()).then(data => {
+                    let isSharing = data;
+
+                    if(!isSharing) {
+                        fetch('http://' + site_ip + ':' + port + '/setEditValue', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ value: true }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Updated user:', data);
+                            })
+                            .catch(error => {
+                                console.error('Error updating edit value to true:', error);
+                            });
+                            
+
+
+                        if(!isStudentScreen) {
+                            let main_input = document.getElementById("user_input_area");
+                            storedText = main_input.value;
+
+                            let side = document.getElementById("side");
+                            side.innerHTML = "<button onclick='returnToHostView()' id='return_to_host_view_button'>Return to Host View</button>" + side.innerHTML;
+
+                            isStudentScreen = true;
+                        }
+
+                        // Find the closest parent element with the class 'screen-container'
+                        var screenContainer = miniScreen.closest('.screen-container');
+                        
+                        if (screenContainer) {
+                            var containerIdString = screenContainer.id;
+                            var containerId = containerIdString.substring("screen-container-".length);
+                            console.log(containerId);
+
+                            let screen_title = document.getElementById("screen-title");
+                            console.log(screenContainer);
+                            console.log(screenContainer.querySelector(".screen-name"));
+                            screen_title.innerText = screenContainer.querySelector(".screen-name").innerText + "'s Screen";
+
+                            //Set the 'sharing id' to the container that was clicked on.
+                            //Should be changed to a post request.
+                            /*
+                            fetch('http://' + site_ip + ':' + port + '/setSharingID/'+containerId).then(response => response.json()).then(data => {
+                                console.log("new sharing id set to: " + containerId);
+                            }).catch(error => {
+                                console.error('/setSharingID/containerId request failed: ', error);
+                            });;
+                            */
+
+                            fetch('http://' + site_ip + ':' + port + '/setSharingID', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({id: containerId}),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Updated user:', data);
+                            })
+                            .catch(error => {
+                                console.error('/setSharingID request failed: ', error);
+                            });
+
+                            let main_input = document.getElementById("user_input_area");
+
+                            fetch('http://' + site_ip + ':' + port + '/getUserText/' + containerId).then(response => response.json()).then(data => {
+                                main_input.value = data;
+                            }).catch(error => {
+                                console.error('/getUserText/containerId request failed: ', error);
+                            });;
+
+                            console.log("should now be editing");
+                        }
+                    }
+                });
+            }
+
+            //Takes the host back to their code they wrote.
+            function returnToHostView() {
+                let main_input = document.getElementById("user_input_area");
+                main_input.value = storedText;
+                let screen_title = document.getElementById("screen-title");
+                screen_title.textContent = "Host View";
+
+                side.innerHTML = side.innerHTML.substring("<button onclick='returnToHostView()' id='return_to_host_view_button'>Return to Host View</button>".length);
+                isStudentScreen = false;
+                fetch('http://' + site_ip + ':' + port + '/setEditValue', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ value: false }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Updated user:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error updating edit value to false:', error);
+                    });
+            }
+
+
+            //Submits the code to the server for running.
+            function submitCode() {
+                let textArea = document.getElementById("user_input_area");
+                console.log(textArea.value);
+                fetch('http://' + site_ip + ':' + port + '/getUserId').then(response => response.json()).then(data => {
+                    let user_id = data;
+
+                    fetch('http://' + site_ip + ':' + port + '/execute-java', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ code: textArea.value }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Response from execute-code: ', data);
+                        })
+                        .catch(error => {
+                            console.error('Error updating edit value to false:', error);
+                        });
+                });
+            }
+
+            //Attempts to reset the status of all users.
+            function resetStatus() {
+                fetch('http://' + site_ip + ':' + port + '/resetStatus').catch(error => {console.error("Error resetting statuses");});
+            }
+
+            //Toggles visibility of privacy mode
+            function privacyToggle() {
+                let side = document.getElementById("side");
+                let main = document.getElementById("main");
+                let screen_title = document.getElementById("screen-title");
+                let user_input_area = document.getElementById("user_input_area");
+                let privacy_toggle_button = document.getElementById("privacy_toggle_button");
+
+                if(side.style.display == "none") {
+                    privacy_toggle_button.innerHTML = "Privacy: Off";
+                    privacy_toggle_button.style.backgroundColor = "rgb(255, 67, 67)";
+                    privacy_toggle_button.marginTop = "-31px";
+                    user_input_area.style.marginTop = "0px"
+                    side.style.display = "flex";
+                    main.style.width = "75%";
+                    screen_title.style.display = "block";
+                }
+                else {
+                    privacy_toggle_button.innerHTML = "Privacy: On";
+                    privacy_toggle_button.style.backgroundColor = "rgb(0, 255, 38)";
+                    privacy_toggle_button.marginTop = "5px";
+                    user_input_area.style.marginTop = "34px";
+                    side.style.display = "none";
+                    main.style.width = "100%";
+                    screen_title.style.display = "none";
+                }
+            }
+
+        </script>
+    </body>
 </html>

@@ -2,11 +2,13 @@
 <html>
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-        <link rel="stylesheet" href="./styles/styles.css">
+        
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.css">
+        <link rel="stylesheet" href="./styles/styles.css">
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/mode/clike/clike.min.js"></script>     
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/mode/clike/clike.min.js"></script>
 
         <meta http-equiv="Cache-control" content="no-cache">
     </head>
@@ -33,6 +35,9 @@
             let storedText = "";
             let isStudentScreen = false;
             let preToggle = null;
+
+            var editor = document.getElementById("editor");
+            var codeMirror;
 
             //Grab the url of the site to determine where to send api requests.
             const site_link = window.location.href;
@@ -106,7 +111,7 @@
 
                                         //Create the inner html for the user
 
-                                        let input = document.getElementById("user_input_area");
+                                        let input = document.getElementById("editor");
                                         //If the user has set their name, then the rest of the code will run.
                                         if(input) {
 
@@ -114,7 +119,8 @@
                                             if(isSharing) {
                                                 //Retrieve what the host has typed
                                                 fetch('http://' + site_ip + ':' + port + '/retrieve').then(response => response.json()).then(data => {
-                                                    input.value = data.text;
+                                                    console.log(codeMirror);
+                                                    codeMirror.setValue(data.text);
                                                 }).catch(error => {
                                                     console.error('/retrieve request failed: ', error);
                                                 });;
@@ -122,7 +128,7 @@
 
                                             if(!isEditing){
                                                 //Create the data pair
-                                                const userText = input.value; // Replace with your new text
+                                                const userText = codeMirror.getValue(); // Replace with your new text
                                                 
                                                 // Send a POST request to the server to update the user_texts variable
                                                 fetch('http://' + site_ip + ':' + port + '/userUpdate', {
@@ -142,7 +148,7 @@
                                                 });
                                             }
                                             else {
-                                                let main_input = document.getElementById("user_input_area");
+                                                let main_input = document.getElementById("editor");
                                                 console.log("made it into editing part");
 
                                                 //If the user's id matched the current one, then their screen gets updated
@@ -156,7 +162,7 @@
                                                         if(user_id == sharingID) {
                                                             fetch('http://' + site_ip + ':' + port + '/userUpdate/retrieve').then(response => response.json()).then(data => {
                                                                 let newText = data;
-                                                                main_input.value = newText;
+                                                                codeMirror.setValue(newText);
                                                             }).catch(error => {
                                                                 console.error('/userUpdate/retrieve request failed: ', error);
                                                             });;
@@ -173,7 +179,7 @@
                                     //If the user is the host then it uploads the data in the text box continuously so any non-host user can grab it
                                     else {
                                         console.log("is host");
-                                        let input = document.getElementById("user_input_area");
+                                        let input = document.getElementById("editor");
                                         //Only try to share if the host is off the username set screen
                                         if(input) {
                                             let shareButton = document.getElementById("share_button");
@@ -203,7 +209,7 @@
                                                 //This section takes care of sharing the text with all connected users.
                                                 console.log("input detected");
                                             
-                                                const newText = input.value;
+                                                const newText = codeMirror.getValue();
                                 
                                                 // Send a POST request to the server to update currentText
                                                 fetch('http://' + site_ip + ':' + port + '/update', {
@@ -223,13 +229,13 @@
                                             }
 
                                             if(isEditing) {
-                                                let main_input = document.getElementById("user_input_area");
+                                                let main_input = document.getElementById("editor");
                                                 console.log("this should be the main input");
                                                 console.log(main_input);
                                                 let new_text = "";
 
                                                 if(main_input.text != "") {
-                                                    new_text = main_input.value;
+                                                    new_text = codeMirror.getValue();
                                                 }
                                                 else {
                                                     new_text = " ";
@@ -367,7 +373,16 @@
                 main.innerHTML = "<div id='screen-title'>Host View</div>" + main.innerHTML;
                 main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";  
                 main.innerHTML += "<button onclick='resetStatus()' id='reset_status_button'>Reset Statuses</button>";  
-                main.innerHTML += "<button onclick='privacyToggle()' id='privacy_toggle_button'>Privacy: Off</button>"        
+                main.innerHTML += "<button onclick='privacyToggle()' id='privacy_toggle_button'>Privacy: Off</button>" 
+                
+                let editor = document.getElementById("editor");
+                codeMirror = CodeMirror.fromTextArea(editor, {
+                        mode: "text/x-java", // Specify the Java mode
+                        theme: "default",    // Choose a theme (e.g., "default")
+                        lineNumbers: true,   // Show line numbers
+                        autofocus: true,     // Auto-focus on the editor when the page loads
+                });
+                
             }
 
             function setUsername() {
@@ -382,9 +397,20 @@
                     if(!isHost){
                         main.innerHTML = "<div id='screen-title'>" + usernameInput + "</div>" + main.innerHTML;
                     }
-                    main.innerHTML += "<textarea rows='20' columns='800' id='user_input_area'></textarea>";
-                    main.innerHTML += "<textarea readonly rows='20' columns='800' id='console_area'></textarea>";
+                    main.innerHTML += "<textarea id='editor'></textarea>";
+                    main.innerHTML += "<textarea readonly id='console_area'></textarea>";
                     main.innerHTML += "<button onclick='submitCode()' id='submit-code-button'>Submit</button>";  
+
+                    if(!isHost){
+                        let editor = document.getElementById("editor");
+                        codeMirror = CodeMirror.fromTextArea(editor, {
+                                mode: "text/x-java", // Specify the Java mode
+                                theme: "default",    // Choose a theme (e.g., "default")
+                                lineNumbers: true,   // Show line numbers
+                                autofocus: true,     // Auto-focus on the editor when the page loads
+                        });
+                    }
+       
 
                 
                     fetch('http://' + site_ip + ':' + port + '/setUsername', {
@@ -482,7 +508,7 @@
 
                         if(!isStudentScreen) {
                             let main_input = document.getElementById("user_input_area");
-                            storedText = main_input.value;
+                            storedText = codeMirror.getValue();
 
                             let side = document.getElementById("side");
                             side.innerHTML = "<button onclick='returnToHostView()' id='return_to_host_view_button'>Return to Host View</button>" + side.innerHTML;
@@ -531,7 +557,7 @@
                             let main_input = document.getElementById("user_input_area");
 
                             fetch('http://' + site_ip + ':' + port + '/getUserText/' + containerId).then(response => response.json()).then(data => {
-                                main_input.value = data;
+                                codeMirror.setValue(data);
                             }).catch(error => {
                                 console.error('/getUserText/containerId request failed: ', error);
                             });;
@@ -545,7 +571,7 @@
             //Takes the host back to their code they wrote.
             function returnToHostView() {
                 let main_input = document.getElementById("user_input_area");
-                main_input.value = storedText;
+                codeMirror.setValue(storedText);
                 let screen_title = document.getElementById("screen-title");
                 screen_title.textContent = "Host View";
 
@@ -571,7 +597,7 @@
             //Submits the code to the server for running.
             function submitCode() {
                 let textArea = document.getElementById("user_input_area");
-                console.log(textArea.value);
+                //console.log(textArea.value);
                 fetch('http://' + site_ip + ':' + port + '/getUserId').then(response => response.json()).then(data => {
                     let user_id = data;
 
@@ -580,7 +606,7 @@
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ code: textArea.value }),
+                            body: JSON.stringify({ code: codeMirror.getValue() }),
                         })
                         .then(response => response.json())
                         .then(data => {
@@ -604,12 +630,13 @@
                 let screen_title = document.getElementById("screen-title");
                 let user_input_area = document.getElementById("user_input_area");
                 let privacy_toggle_button = document.getElementById("privacy_toggle_button");
+                var CodeMirrorClass = document.querySelector(".CodeMirror");
 
                 if(side.style.display == "none") {
                     privacy_toggle_button.innerHTML = "Privacy: Off";
                     privacy_toggle_button.style.backgroundColor = "rgb(255, 67, 67)";
                     privacy_toggle_button.marginTop = "-31px";
-                    user_input_area.style.marginTop = "0px"
+                    CodeMirrorClass.style.marginTop = "0px"
                     side.style.display = "flex";
                     main.style.width = "75%";
                     screen_title.style.display = "block";
@@ -618,7 +645,7 @@
                     privacy_toggle_button.innerHTML = "Privacy: On";
                     privacy_toggle_button.style.backgroundColor = "rgb(0, 255, 38)";
                     privacy_toggle_button.marginTop = "5px";
-                    user_input_area.style.marginTop = "34px";
+                    CodeMirrorClass.style.marginTop = "34px";
                     side.style.display = "none";
                     main.style.width = "100%";
                     screen_title.style.display = "none";
