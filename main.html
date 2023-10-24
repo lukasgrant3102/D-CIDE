@@ -125,13 +125,19 @@
                                                 }).catch(error => {
                                                     console.error('/retrieve request failed: ', error);
                                                 });;
+
+                                                let CodeMirrorList = document.getElementsByClassName("CodeMirror");
+                                                let codeInstance = CodeMirrorList[0];
+                                                codeInstance.style.border = "4px solid lime";
+                                            }
+                                            else if(!isSharing && !isEditing) {
+                                                let CodeMirrorList = document.getElementsByClassName("CodeMirror");
+                                                let codeInstance = CodeMirrorList[0];
+                                                codeInstance.style.border = "0px solid lime";
                                             }
 
 
-                                            let CodeMirrorList = document.getElementsByClassName("CodeMirror");
-                                            let codeInstance = CodeMirrorList[0];
-
-                                            if(!isEditing){
+                                            if(!isEditing && !isSharing){
                                                 //Create the data pair
                                                 const userText = codeMirror.getValue(); // Replace with your new text
                                                 
@@ -152,9 +158,11 @@
                                                     console.log('Error updating user_texts:', error);
                                                 });
 
+                                                let CodeMirrorList = document.getElementsByClassName("CodeMirror");
+                                                let codeInstance = CodeMirrorList[0];
                                                 codeInstance.style.border = "0px solid red";
                                             }
-                                            else {
+                                            else if(!isSharing && isEditing){
                                                 let main_input = document.getElementById("editor");
                                                 console.log("made it into editing part");
 
@@ -175,6 +183,8 @@
                                                             });;
 
                                                             //Set the border to red indicating that it is being editted by the host
+                                                            let CodeMirrorList = document.getElementsByClassName("CodeMirror");
+                                                            let codeInstance = CodeMirrorList[0];
                                                             codeInstance.style.border = "4px solid red";
                                                         }
                                                     }).catch(error => {
@@ -250,6 +260,10 @@
                                                 else {
                                                     new_text = " ";
                                                 }
+
+                                                let CodeMirrorList = document.getElementsByClassName("CodeMirror");
+                                                let codeInstance = CodeMirrorList[0];
+                                                codeInstance.style.border = "4px solid red";
 
                                                 console.log("New text is set to: " + new_text);
 
@@ -392,6 +406,10 @@
                         lineNumbers: true,   // Show line numbers
                         autofocus: true,     // Auto-focus on the editor when the page loads
                 });
+
+                let CodeMirrorList = document.getElementsByClassName("CodeMirror");
+                let codeInstance = CodeMirrorList[0];
+                codeInstance.style.border = "4px solid lime";
                 
             }
 
@@ -607,6 +625,10 @@
                     .catch(error => {
                         console.error('Error updating edit value to false:', error);
                     });
+
+                    let CodeMirrorList = document.getElementsByClassName("CodeMirror");
+                    let codeInstance = CodeMirrorList[0];
+                    codeInstance.style.border = "0px solid red";
             }
 
 

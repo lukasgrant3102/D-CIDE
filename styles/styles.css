@@ -114,8 +114,6 @@ textarea:focus
     margin-right: auto;
     width: 93%;
     height: 55%;
-
-    border: 4px solid lime;
 }
 
 #console_area {
