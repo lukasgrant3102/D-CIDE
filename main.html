@@ -127,6 +127,10 @@
                                                 });;
                                             }
 
+
+                                            let CodeMirrorList = document.getElementsByClassName("CodeMirror");
+                                            let codeInstance = CodeMirrorList[0];
+
                                             if(!isEditing){
                                                 //Create the data pair
                                                 const userText = codeMirror.getValue(); // Replace with your new text
@@ -147,6 +151,8 @@
                                                 .catch(error => {
                                                     console.log('Error updating user_texts:', error);
                                                 });
+
+                                                codeInstance.style.border = "0px solid red";
                                             }
                                             else {
                                                 let main_input = document.getElementById("editor");
@@ -167,6 +173,9 @@
                                                             }).catch(error => {
                                                                 console.error('/userUpdate/retrieve request failed: ', error);
                                                             });;
+
+                                                            //Set the border to red indicating that it is being editted by the host
+                                                            codeInstance.style.border = "4px solid red";
                                                         }
                                                     }).catch(error => {
                                                         console.error('/getSharingId request failed: ', error);
@@ -371,7 +380,7 @@
                 content.innerHTML += "<div id='side'></div>";
 
                 main = document.getElementById("main");
-                main.innerHTML = "<div id='screen-title'>Host View</div>" + main.innerHTML;
+                main.innerHTML = "<div id='screen-title'>Host View - Sharing</div>" + main.innerHTML;
                 main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";  
                 main.innerHTML += "<button onclick='resetStatus()' id='reset_status_button'>Reset Statuses</button>";  
                 main.innerHTML += "<button onclick='privacyToggle()' id='privacy_toggle_button'>Privacy: Off</button>" 
@@ -444,6 +453,11 @@
                     shareButton.textContent = "Toggling";
                     shareButton.disabled = true;
                     preToggle = data;
+
+                    let CodeMirrorList = document.getElementsByClassName("CodeMirror");
+                    let codeInstance = CodeMirrorList[0];
+
+                    let screenTitle = document.getElementById("screen-title");
                     
                     if(isSharing) {
                         fetch('http://' + site_ip + ':' + port + '/setShareValue', {
@@ -461,6 +475,11 @@
                             console.error('Error turing sharing off:', error);
                         });
                         console.log("Sharing should stop");
+
+                        codeInstance.style.border = "0px solid lime";
+                        screenTitle.textContent = "Host View";
+
+
                     }
                     else if(!isSharing) {
                         fetch('http://' + site_ip + ':' + port + '/setShareValue', {
@@ -477,6 +496,10 @@
                         .catch(error => {
                             console.error('Error turning share on:', error);
                         });
+
+
+                        codeInstance.style.border = "4px solid lime";
+                        screenTitle.textContent = "Host View - Sharing";
                     }
 
                 }).catch(error => {
@@ -531,15 +554,6 @@
                             screen_title.innerText = screenContainer.querySelector(".screen-name").innerText + "'s Screen";
 
                             //Set the 'sharing id' to the container that was clicked on.
-                            //Should be changed to a post request.
-                            /*
-                            fetch('http://' + site_ip + ':' + port + '/setSharingID/'+containerId).then(response => response.json()).then(data => {
-                                console.log("new sharing id set to: " + containerId);
-                            }).catch(error => {
-                                console.error('/setSharingID/containerId request failed: ', error);
-                            });;
-                            */
-
                             fetch('http://' + site_ip + ':' + port + '/setSharingID', {
                                 method: 'POST',
                                 headers: {
@@ -564,6 +578,7 @@
                             });;
 
                             console.log("should now be editing");
+
                         }
                     }
                 });
