@@ -11,7 +11,8 @@ const bp = require("body-parser");
 const cors = require("cors");
 const http = require('http').Server(app);
 const fetch = require('node-fetch');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const { v4: uuidv4 } = require('uuid');
 
 //This is the text at the top of the screen
 let currentText = {
@@ -273,14 +274,16 @@ fetch('https://api.ipify.org?format=json')
     app.post('/execute-java', (req, res) => {
         file_count += 1;
         // Receive Java code from the POST request
+        const uniqueID = uuidv4();
+
         const javaCode = req.body.code;
-        const newCode = "public class class_" + file_count + "{\n" + javaCode + "\n}";
+        const newCode = "public class class_" + uniqueID + "{\n" + javaCode + "\n}";
 
         let deviceID = req.cookies.deviceID || generateUniqueID();
 
       
         // Write the Java code to a temporary file
-        fs.writeFile('JavaFiles/class_' + file_count + '.java', newCode, (writeError) => {
+        fs.writeFile('JavaFiles/class_' + uniqueID + '.java', newCode, (writeError) => {
           if (writeError) {
             user_console_texts[deviceID] = writeError;
             res.status(500).json({ error: 'Error writing Java code to file' });
@@ -289,7 +292,7 @@ fetch('https://api.ipify.org?format=json')
           
           
           // Compile the Java source code into a class
-            exec('javac JavaFiles/class_' + file_count + '.java', (compileError) => {
+            exec('javac JavaFiles/class_' + uniqueID + '.java', (compileError) => {
                 if (compileError) {
                     status_id_pairs[deviceID] = "red";
                     user_console_texts[deviceID] = "Error compiling code";
@@ -298,7 +301,7 @@ fetch('https://api.ipify.org?format=json')
                 }
             
                 // Execute the compiled Java class
-                exec('java -cp JavaFiles class_' + file_count, (executionError, stdout, stderr) => {
+                exec('java -cp JavaFiles class_' + uniqueID, (executionError, stdout, stderr) => {
                     if (executionError) {
                         status_id_pairs[deviceID] = "red";
                         user_console_texts[deviceID] = stderr;
@@ -312,12 +315,12 @@ fetch('https://api.ipify.org?format=json')
                     }
                     
                     // Clean up: Remove the temporary files
-                    fs.unlink('JavaFiles/class_' + file_count + '.java', (unlinkError) => {
+                    fs.unlink('JavaFiles/class_' + uniqueID + '.java', (unlinkError) => {
                         if (unlinkError) {
                             console.error('Error deleting temporary Java file');
                         }
                     });
-                    fs.unlink('JavaFiles/class_' + file_count + '.class', (unlinkError) => {
+                    fs.unlink('JavaFiles/class_' + uniqueID + '.class', (unlinkError) => {
                         if (unlinkError) {
                             console.error('Error deleting temporary class file');
                         }
