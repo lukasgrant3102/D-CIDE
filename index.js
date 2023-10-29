@@ -274,7 +274,9 @@ fetch('https://api.ipify.org?format=json')
     app.post('/execute-java', (req, res) => {
         file_count += 1;
         // Receive Java code from the POST request
-        const uniqueID = uuidv4();
+        const uniqueID_PRE = uuidv4();
+        let uniqueID = uniqueID_PRE.replace(/-/g, "_");
+
 
         const javaCode = req.body.code;
         const newCode = "public class class_" + uniqueID + "{\n" + javaCode + "\n}";
