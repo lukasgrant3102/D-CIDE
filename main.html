@@ -137,7 +137,7 @@
                                             }
 
 
-                                            if(!isEditing && !isSharing){
+                                            if(!isEditing){
                                                 //Create the data pair
                                                 const userText = codeMirror.getValue(); // Replace with your new text
                                                 
@@ -157,10 +157,6 @@
                                                 .catch(error => {
                                                     console.log('Error updating user_texts:', error);
                                                 });
-
-                                                let CodeMirrorList = document.getElementsByClassName("CodeMirror");
-                                                let codeInstance = CodeMirrorList[0];
-                                                codeInstance.style.border = "0px solid red";
                                             }
                                             else if(!isSharing && isEditing){
                                                 let main_input = document.getElementById("editor");
@@ -193,6 +189,13 @@
                                                 }).catch(error => {
                                                     console.error('/getUserId request failed: ', error);
                                                 });;
+                                            }
+
+                                            //Remove the red border if the host is not sharing or editing.
+                                            if(!isEditing && !isSharing){
+                                                let CodeMirrorList = document.getElementsByClassName("CodeMirror");
+                                                let codeInstance = CodeMirrorList[0];
+                                                codeInstance.style.border = "0px solid red";
                                             }
                                         }   
                                     }
