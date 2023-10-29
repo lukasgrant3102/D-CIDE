@@ -293,6 +293,7 @@
                                                 console.log(data);
                                                 let user_texts = data;
                                                 fetch('http://' + site_ip + ':' + port + '/getNamePairs').then(response => response.json()).then(pairs => {
+                                                    console.log(pairs);
                                                     let name_pairs = pairs;
 
                                                     fetch('http://' + site_ip + ':' + port + '/getStatusPairs').then(response => response.json()).then(sPairs => {
