@@ -297,7 +297,15 @@ fetch('https://api.ipify.org?format=json')
             exec('javac JavaFiles/class_' + uniqueID + '.java', (compileError) => {
                 if (compileError) {
                     status_id_pairs[deviceID] = "red";
-                    user_console_texts[deviceID] = "Error compiling code";
+                    user_console_texts[deviceID] = compileError.message;
+                    
+                    //Delete file
+                    fs.unlink('JavaFiles/class_' + uniqueID + '.java', (unlinkError) => {
+                        if (unlinkError) {
+                            console.error('Error deleting temporary Java file');
+                        }
+                    });
+
                     res.status(500).json({ error: "Error compiling code: \n" + newCode });
                     return;
                 }
@@ -307,6 +315,19 @@ fetch('https://api.ipify.org?format=json')
                     if (executionError) {
                         status_id_pairs[deviceID] = "red";
                         user_console_texts[deviceID] = stderr;
+
+                        //Delete files
+                        fs.unlink('JavaFiles/class_' + uniqueID + '.java', (unlinkError) => {
+                            if (unlinkError) {
+                                console.error('Error deleting temporary Java file');
+                            }
+                        });
+                        fs.unlink('JavaFiles/class_' + uniqueID + '.class', (unlinkError) => {
+                            if (unlinkError) {
+                                console.error('Error deleting temporary class file');
+                            }
+                        }); 
+                        
                         res.status(500).json({ error: 'Error executing Java code: \n' + executionError });
                     } else {
                         // Capture the output of the executed code
@@ -345,7 +366,7 @@ fetch('https://api.ipify.org?format=json')
 
 
 
-    let ip = "10.200.47.59";
+    let ip = "10.200.44.13";
     //let ip = "216.249.148.174"
     //let ip = "172.26.88.82";
     //Listen for requests at the specified port
