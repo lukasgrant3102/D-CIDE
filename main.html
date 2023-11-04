@@ -399,9 +399,11 @@
 
                 main = document.getElementById("main");
                 main.innerHTML = "<div id='screen-title'>Host View - Sharing</div>" + main.innerHTML;
-                main.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";  
-                main.innerHTML += "<button onclick='resetStatus()' id='reset_status_button'>Reset Statuses</button>";  
-                main.innerHTML += "<button onclick='privacyToggle()' id='privacy_toggle_button'>Privacy: Off</button>" 
+
+                let button_container = document.getElementById('button-container');
+                button_container.innerHTML += "<button onclick='toggleShare()' id='share_button'>Sharing: On</button>";  
+                button_container.innerHTML += "<button onclick='resetStatus()' id='reset_status_button'>Reset Statuses</button>";  
+                button_container.innerHTML += "<button onclick='privacyToggle()' id='privacy_toggle_button'>Privacy: Off</button>" 
                 
                 let editor = document.getElementById("editor");
                 codeMirror = CodeMirror.fromTextArea(editor, {
@@ -431,7 +433,10 @@
                     }
                     main.innerHTML += "<textarea id='editor'></textarea>";
                     main.innerHTML += "<textarea readonly id='console_area'></textarea>";
-                    main.innerHTML += "<button onclick='submitCode()' id='submit-code-button'>Submit</button>";  
+                    main.innerHTML += "<div id='button-container'></div>";
+
+                    let button_container = document.getElementById('button-container');
+                    button_container.innerHTML += "<button onclick='submitCode()' id='submit-code-button'>Submit</button>";  
 
                     if(!isHost){
                         let editor = document.getElementById("editor");
@@ -459,6 +464,7 @@
                     .catch(error => {
                         console.error('Error updating currentText:', error);
                     });
+                    
                 }
             }
 

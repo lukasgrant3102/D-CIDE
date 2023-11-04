@@ -279,7 +279,8 @@ fetch('https://api.ipify.org?format=json')
 
 
         const javaCode = req.body.code;
-        const newCode = "public class class_" + uniqueID + "{\n" + javaCode + "\n}";
+        const myImports = "import java.util.List;import java.util.Arrays;import java.util.Comparator;import java.util.Collections;import java.util.function.Predicate;import java.util.function.Function;import java.util.function.Consumer;import java.util.function.Supplier;import java.util.function.UnaryOperator;import java.util.function.BinaryOperator;import java.util.stream.Stream;import java.util.stream.Collectors;import java.util.ArrayList;"
+        const newCode = myImports + "public class class_" + uniqueID + "{\n" + javaCode + "\n}";
 
         let deviceID = req.cookies.deviceID || generateUniqueID();
 
