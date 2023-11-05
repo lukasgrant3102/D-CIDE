@@ -278,15 +278,36 @@ fetch('https://api.ipify.org?format=json')
         let uniqueID = uniqueID_PRE.replace(/-/g, "_");
 
 
-        const javaCode = req.body.code;
-        const myImports = "import java.util.List;import java.util.Arrays;import java.util.Comparator;import java.util.Collections;import java.util.function.Predicate;import java.util.function.Function;import java.util.function.Consumer;import java.util.function.Supplier;import java.util.function.UnaryOperator;import java.util.function.BinaryOperator;import java.util.stream.Stream;import java.util.stream.Collectors;import java.util.ArrayList;"
-        const newCode = myImports + "public class class_" + uniqueID + "{\n" + javaCode + "\n}";
+        let javaCode = req.body.code;
+        let match = javaCode.match(/public class (\w+)/);
+        let className = "class_" + uniqueID
+
+
+        if (match) {
+            javaCode = javaCode.replace(/(public class \w+)/, `$1_${uniqueID}`);
+
+            className = match ? match[1] : null;
+            //const myImports = "import java.util.List;import java.util.Arrays;import java.util.Comparator;import java.util.Collections;import java.util.function.Predicate;import java.util.function.Function;import java.util.function.Consumer;import java.util.function.Supplier;import java.util.function.UnaryOperator;import java.util.function.BinaryOperator;import java.util.stream.Stream;import java.util.stream.Collectors;import java.util.ArrayList;"
+        }
+
+        let newClassName = className;
+
+        let newMatch = javaCode.match(/public class (\w+)/);
+        
+
+        if (newMatch) {
+            console.log("There was a new match!!!")
+            newClassName = className = newMatch ? newMatch[1] : null;
+            console.log(newClassName);
+        }
+
+
 
         let deviceID = req.cookies.deviceID || generateUniqueID();
 
       
         // Write the Java code to a temporary file
-        fs.writeFile('JavaFiles/class_' + uniqueID + '.java', newCode, (writeError) => {
+        fs.writeFile('JavaFiles/' + newClassName + '.java', javaCode, (writeError) => {
           if (writeError) {
             user_console_texts[deviceID] = writeError;
             res.status(500).json({ error: 'Error writing Java code to file' });
@@ -295,35 +316,35 @@ fetch('https://api.ipify.org?format=json')
           
           
           // Compile the Java source code into a class
-            exec('javac JavaFiles/class_' + uniqueID + '.java', (compileError) => {
+            exec('javac JavaFiles/' + newClassName + '.java', (compileError) => {
                 if (compileError) {
                     status_id_pairs[deviceID] = "red";
                     user_console_texts[deviceID] = compileError.message;
                     
                     //Delete file
-                    fs.unlink('JavaFiles/class_' + uniqueID + '.java', (unlinkError) => {
+                    fs.unlink('JavaFiles/' + newClassName + '.java', (unlinkError) => {
                         if (unlinkError) {
                             console.error('Error deleting temporary Java file');
                         }
                     });
 
-                    res.status(500).json({ error: "Error compiling code: \n" + newCode });
+                    res.status(500).json({ error: "Error compiling code: \n" + javaCode });
                     return;
                 }
             
                 // Execute the compiled Java class
-                exec('java -cp JavaFiles class_' + uniqueID, (executionError, stdout, stderr) => {
+                exec('java -cp JavaFiles ' + newClassName, (executionError, stdout, stderr) => {
                     if (executionError) {
                         status_id_pairs[deviceID] = "red";
                         user_console_texts[deviceID] = stderr;
 
                         //Delete files
-                        fs.unlink('JavaFiles/class_' + uniqueID + '.java', (unlinkError) => {
+                        fs.unlink('JavaFiles/' + newClassName + '.java', (unlinkError) => {
                             if (unlinkError) {
                                 console.error('Error deleting temporary Java file');
                             }
                         });
-                        fs.unlink('JavaFiles/class_' + uniqueID + '.class', (unlinkError) => {
+                        fs.unlink('JavaFiles/' + newClassName + '.class', (unlinkError) => {
                             if (unlinkError) {
                                 console.error('Error deleting temporary class file');
                             }
@@ -339,16 +360,34 @@ fetch('https://api.ipify.org?format=json')
                     }
                     
                     // Clean up: Remove the temporary files
-                    fs.unlink('JavaFiles/class_' + uniqueID + '.java', (unlinkError) => {
+                    fs.unlink('JavaFiles/' + newClassName + '.java', (unlinkError) => {
                         if (unlinkError) {
                             console.error('Error deleting temporary Java file');
                         }
                     });
-                    fs.unlink('JavaFiles/class_' + uniqueID + '.class', (unlinkError) => {
+                    fs.unlink('JavaFiles/' + newClassName + '.class', (unlinkError) => {
                         if (unlinkError) {
                             console.error('Error deleting temporary class file');
                         }
                     }); 
+
+                    // Check and delete .class files generated due to anonymous inner classes
+                    fs.readdir('JavaFiles', (err, files) => {
+                        if (err) {
+                            console.error('Error reading the JavaFiles directory');
+                            return;
+                        }
+
+                        // Filter and delete files matching the pattern
+                        files.filter(file => file.startsWith(newClassName + "$") && file.endsWith('.class'))
+                            .forEach(file => {
+                                fs.unlink('JavaFiles/' + file, unlinkErr => {
+                                    if (unlinkErr) {
+                                        console.error(`Error deleting ${file}`);
+                                    }
+                                });
+                            });
+                    });
                 });
             });
         }); 
