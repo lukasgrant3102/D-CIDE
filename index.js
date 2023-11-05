@@ -39,7 +39,7 @@ fetch('https://api.ipify.org?format=json')
 
     //Start main app here.
     user_ip = data.ip;
-    console.log(user_ip);
+    //console.log(user_ip);
 
     //Set up express and its middleware
     app.use(cors());
@@ -124,7 +124,7 @@ fetch('https://api.ipify.org?format=json')
     // POST handler to update a specific user_text variable based on id
     app.post("/userUpdate/send", function(req, res){
         const newText = req.body.text;
-        console.log(newText);
+        //console.log(newText);
 
         // Update the user_texts variable with the deviceID as the key
         soloText = newText;
@@ -188,7 +188,7 @@ fetch('https://api.ipify.org?format=json')
     //GET a specific user text based on id
     app.get("/getUserText/:user_id", function(req, res){
         const getData = async () => {
-            console.log("Getting by user id: " + user_texts[req.params.user_id]);
+            //console.log("Getting by user id: " + user_texts[req.params.user_id]);
             res.send(JSON.stringify(user_texts[req.params.user_id]));
         };
         getData();
@@ -228,7 +228,7 @@ fetch('https://api.ipify.org?format=json')
         const getData = async () => {
 
             const newValue = req.body.value;
-            console.log("setShareValue body: " + newValue);
+            //console.log("setShareValue body: " + newValue);
             isSharing = newValue;
 
             // Send a response with the updated user_texts
@@ -243,7 +243,7 @@ fetch('https://api.ipify.org?format=json')
         const getData = async () => {
 
             const newValue = req.body.value;
-            console.log("setEditValue body: " + newValue);
+            //console.log("setEditValue body: " + newValue);
             isEditing = newValue;
 
             // Send a response with the updated user_texts
@@ -287,7 +287,6 @@ fetch('https://api.ipify.org?format=json')
             javaCode = javaCode.replace(/(public class \w+)/, `$1_${uniqueID}`);
 
             className = match ? match[1] : null;
-            //const myImports = "import java.util.List;import java.util.Arrays;import java.util.Comparator;import java.util.Collections;import java.util.function.Predicate;import java.util.function.Function;import java.util.function.Consumer;import java.util.function.Supplier;import java.util.function.UnaryOperator;import java.util.function.BinaryOperator;import java.util.stream.Stream;import java.util.stream.Collectors;import java.util.ArrayList;"
         }
 
         let newClassName = className;
@@ -296,9 +295,7 @@ fetch('https://api.ipify.org?format=json')
         
 
         if (newMatch) {
-            console.log("There was a new match!!!")
             newClassName = className = newMatch ? newMatch[1] : null;
-            console.log(newClassName);
         }
 
 
@@ -355,7 +352,7 @@ fetch('https://api.ipify.org?format=json')
                         // Capture the output of the executed code
                         status_id_pairs[deviceID] = "green";
                         user_console_texts[deviceID] = stdout;
-                        console.log(stdout);
+                        //console.log(stdout);
                         res.json({ output: stdout });
                     }
                     
@@ -399,7 +396,7 @@ fetch('https://api.ipify.org?format=json')
 
         const getData = async () => {
             res.send(JSON.stringify(user_console_texts[deviceID]));
-            console.log(JSON.stringify(user_console_texts[deviceID]));
+            //console.log(JSON.stringify(user_console_texts[deviceID]));
         };
         getData();
     });
@@ -411,7 +408,7 @@ fetch('https://api.ipify.org?format=json')
     //let ip = "172.26.88.82";
     //Listen for requests at the specified port
     http.listen(PORT, ip, function () {
-        console.log('Running at ' + ip + ":" + PORT); 
+        console.log('Running at ' + ip + ":" + PORT + "/main.html"); 
     }); 
 });
 
