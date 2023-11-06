@@ -280,22 +280,20 @@ fetch('https://api.ipify.org?format=json')
 
         let javaCode = req.body.code;
         let match = javaCode.match(/public class (\w+)/);
-        let className = "class_" + uniqueID
-
+        let className = match ? match[1] : null; // Initial class name before modification
+        let newClassName = "NoClassDefined";
 
         if (match) {
-            javaCode = javaCode.replace(/(public class \w+)/, `$1_${uniqueID}`);
+            newClassName = `${className}_${uniqueID}`;
+            // Replace the class declaration with the new name including the uniqueID
+            javaCode = javaCode.replace(match[0], `public class ${newClassName}`);
 
-            className = match ? match[1] : null;
-        }
+            // Regular expression to match the constructor declarations and class instantiations
+            const pattern = `\\b${className}\\b`;
+            const regex = new RegExp(pattern, 'g');
 
-        let newClassName = className;
-
-        let newMatch = javaCode.match(/public class (\w+)/);
-        
-
-        if (newMatch) {
-            newClassName = className = newMatch ? newMatch[1] : null;
+            // Replace all occurrences of the class name with the new name including the uniqueID
+            javaCode = javaCode.replace(regex, newClassName);
         }
 
 
@@ -403,7 +401,7 @@ fetch('https://api.ipify.org?format=json')
 
 
 
-    let ip = "192.168.60.249";
+    let ip = "216.249.148.174";
     //let ip = "216.249.148.174"
     //let ip = "172.26.88.82";
     //Listen for requests at the specified port
