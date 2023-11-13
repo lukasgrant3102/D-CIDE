@@ -19,7 +19,6 @@ let currentText = {
     text: "default"
 };
 
-let name_id_pairs = {};
 
 //This is the variable that controls all user text.
 let user_texts = {};
